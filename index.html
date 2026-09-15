@@ -56,40 +56,57 @@
 
     let allMatches = [];
 
-    const singleRef = ref(db, 'MatchBuzz/SingleMatches');
-    onValue(singleRef, (snapshot) => {
+    const dbRef = ref(db);
+    onValue(dbRef, (snapshot) => {
         allMatches = [];
         if (snapshot.exists()) {
-            snapshot.forEach((childSnap) => {
-                let match = childSnap.val();
-                if (!match.is_game_over) {
-                    allMatches.push({
-                        title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id})`,
-                        sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
-                        searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase()
-                    });
-                }
-            });
-        }
+            let rootData = snapshot.val();
 
-        const tourRef = ref(db, 'Tournaments');
-        onValue(tourRef, (tourSnap) => {
-            if (tourSnap.exists()) {
-                tourSnap.forEach((tSnap) => {
-                    let tourKey = tSnap.key;
-                    if (tourKey.startsWith("Tour_")) {
-                        let tId = tourKey.replace("Tour_", "");
-                        let tName = tSnap.child("T_Name").val() || "TOURNAMENT";
+            if (rootData.MatchBuzz && rootData.MatchBuzz.SingleMatches) {
+                let singles = rootData.MatchBuzz.SingleMatches;
+                Object.keys(singles).forEach(key => {
+                    let match = singles[key];
+                    if (!match.is_game_over) {
                         allMatches.push({
-                            title: `🏆 ${tName.toUpperCase()} (${tId})`,
-                            sub: "Tournament in Progress",
-                            searchKey: `${tName} ${tId}`.toLowerCase()
+                            title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
+                            sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
+                            searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase()
                         });
                     }
                 });
             }
-            renderMatchesList(allMatches);
-        });
+
+            if (rootData.Tournaments) {
+                let tournaments = rootData.Tournaments;
+                Object.keys(tournaments).forEach(tourKey => {
+                    if (tourKey.startsWith("Tour_")) {
+                        let tour = tournaments[tourKey];
+                        let tName = tour.T_Name || tourKey;
+                        let matches = tour.Matches || {};
+                        
+                        Object.keys(matches).forEach(matchKey => {
+                            let mData = matches[matchKey];
+                            let winner = mData.Winner || "";
+                            let team1 = mData.Team1 || "TBD";
+                            let team2 = mData.Team2 || "TBD";
+                            let matchNum = matchKey.replace("Match_", "Match ");
+
+                            let subText = `Team: ${team1} vs ${team2}`;
+                            if (winner) {
+                                subText = `Winner: ${winner} | ${team1} vs ${team2}`;
+                            }
+
+                            allMatches.push({
+                                title: `🏆 ${tName.toUpperCase()} - ROUND OF 16 (${matchNum})`,
+                                sub: subText,
+                                searchKey: `${tName} ${matchNum} ${team1} ${team2} ${winner}`.toLowerCase()
+                            });
+                        });
+                    }
+                });
+            }
+        }
+        renderMatchesList(allMatches);
     });
 
     window.renderMatchesList = function(list) {

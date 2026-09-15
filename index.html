@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Live Matches</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .header h2 { margin: 0; color: #1A237E; font-size: 18px; }
+        .search-box { display: flex; margin-bottom: 15px; }
+        .search-box input { flex: 1; padding: 12px; border: none; border-radius: 8px 0 0 8px; outline: none; font-size: 14px; }
+        .search-box button { background: #1A237E; color: white; border: none; padding: 0 20px; border-radius: 0 8px 8px 0; font-weight: bold; cursor: pointer; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
+        .card h3 { margin: 0 0 8px 0; color: #1A237E; font-size: 16px; }
+        .card p { margin: 0; color: #555; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>LIVE & RECENT MATCHES</h2>
+        <button onclick="location.reload()" style="background:#1A237E; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">🔄</button>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search tournament, team or ID..." onkeyup="filterMatches()">
+        <button>Search</button>
+    </div>
+
+    <div id="matchListContainer">
+        <div style="text-align: center; color: #666; padding: 20px;">Loading...</div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let allMatches = [];
+
+    const singleRef = ref(db, 'MatchBuzz/SingleMatches');
+    onValue(singleRef, (snapshot) => {
+        allMatches = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnap) => {
+                let match = childSnap.val();
+                if (!match.is_game_over) {
+                    allMatches.push({
+                        title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id})`,
+                        sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
+                        searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase()
+                    });
+                }
+            });
+        }
+
+        const tourRef = ref(db, 'Tournaments');
+        onValue(tourRef, (tourSnap) => {
+            if (tourSnap.exists()) {
+                tourSnap.forEach((tSnap) => {
+                    let tourKey = tSnap.key;
+                    if (tourKey.startsWith("Tour_")) {
+                        let tId = tourKey.replace("Tour_", "");
+                        let tName = tSnap.child("T_Name").val() || "TOURNAMENT";
+                        allMatches.push({
+                            title: `🏆 ${tName.toUpperCase()} (${tId})`,
+                            sub: "Tournament in Progress",
+                            searchKey: `${tName} ${tId}`.toLowerCase()
+                        });
+                    }
+                });
+            }
+            renderMatchesList(allMatches);
+        });
+    });
+
+    window.renderMatchesList = function(list) {
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '';
+
+        if (list.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px;">No live match found.</div>';
+            return;
+        }
+
+        list.forEach(item => {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${item.title}</h3><p>${item.sub}</p>`;
+            container.appendChild(card);
+        });
+    }
+
+    window.filterMatches = function() {
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = allMatches.filter(item => item.searchKey.includes(query));
+        renderMatchesList(filtered);
+    }
+</script>
+
+</body>
+</html>

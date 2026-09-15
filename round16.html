@@ -147,7 +147,7 @@
         
         btnNextRound.onclick = () => {
             if (allR16Done) {
-                alert('Proceeding to Quarter-Finals!');
+                window.location.href = `quater.html?tour=${tourKey}`;
             } else {
                 alert('Please finish all matches in this round!');
             }

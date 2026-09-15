@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Semi Finals</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #FFF3E0; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; padding-bottom: 30px; }
+        .back-btn { background: transparent; color: #E65100; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; margin-bottom: 10px; }
+        .tour-banner { background: #E65100; border: 3px solid #FFB300; border-radius: 16px; padding: 25px 30px; text-align: center; margin-bottom: 20px; grid-column: 1 / -1; }
+        .tour-badge { color: #FFE082; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
+        .page-title { text-align: center; color: #BF360C; font-size: 22px; font-weight: bold; margin-bottom: 20px; grid-column: 1 / -1; }
+        
+        .matches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        
+        .card { background: #FFFFFF; border: 2px solid #F57C00; border-radius: 16px; padding: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+        .match-title { color: #E65100; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+        
+        .select-box { width: 100%; background: #FFF3E0; border: 1px solid #FFE082; border-radius: 12px; padding: 15px; text-align: center; color: #E65100; font-size: 18px; font-weight: bold; margin: 5px 0; outline: none; }
+        .vs-text { text-align: center; color: #D32F2F; font-size: 13px; font-weight: bold; margin: 5px 0; }
+        
+        .winner-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 15px; background: #FAFAFA; padding: 12px; border-radius: 12px; }
+        .manual-col { flex: 1.1; }
+        .manual-label { color: #555555; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        .btn-sub-layout { display: flex; gap: 8px; margin-bottom: 6px; }
+        .win-btn { background: #FFE0B2; color: #E65100; border: none; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .reset-btn { background: #FFEBEE; color: #D32F2F; border: none; padding: 4px 10px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; }
+        
+        .winner-col { flex: 0.9; text-align: left; padding-left: 10px; }
+        .winner-header { color: #C2185B; font-size: 12px; font-weight: bold; }
+        .winner-name { color: #E65100; font-size: 18px; font-weight: bold; margin-top: 2px; }
+        
+        .action-btn { width: 100%; border: none; border-radius: 12px; padding: 15px; font-size: 13px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        
+        .bottom-nav { grid-column: 1 / -1; display: flex; gap: 10px; margin-bottom: 15px; }
+        .nav-btn { flex: 1; background: #ECEFF1; border: 1px solid #CFD8DC; border-radius: 10px; padding: 15px; color: #37474F; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
+        
+        .next-btn { grid-column: 1 / -1; width: 100%; border: none; border-radius: 16px; padding: 25px; font-size: 15px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Loading Semi Finals...</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour') || 'Tour_0';
+    const tourIndex = tourKey.replace('Tour_', '');
+
+    const tourRef = ref(db, `Tournaments/${tourKey}`);
+    onValue(tourRef, (snapshot) => {
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '';
+
+        let tName = "TOURNAMENT";
+        let teamList = [];
+        let matches = {};
+        let sfWinners = {};
+
+        if (snapshot.exists()) {
+            let data = snapshot.val();
+            tName = data.T_Name || tourKey;
+            matches = data.Matches || {};
+            if (data.Teams) {
+                teamList = Object.values(data.Teams);
+            }
+            if (data.SemiFinal_Winner_0) sfWinners[0] = data.SemiFinal_Winner_0;
+            if (data.SemiFinal_Winner_1) sfWinners[1] = data.SemiFinal_Winner_1;
+        }
+
+        let btnBack = document.createElement('button');
+        btnBack.className = 'back-btn';
+        btnBack.innerHTML = '←';
+        btnBack.onclick = () => window.location.href = `quarter.html?tour=${tourKey}`;
+        container.appendChild(btnBack);
+
+        let tourBanner = document.createElement('div');
+        tourBanner.className = 'tour-banner';
+        tourBanner.innerHTML = `<div class="tour-badge">★ SEMI FINALS ★</div><h2>${tName.toUpperCase()}</h2>`;
+        container.appendChild(tourBanner);
+
+        let pageTitle = document.createElement('div');
+        pageTitle.className = 'page-title';
+        pageTitle.innerHTML = 'SEMI FINAL MATCHES';
+        container.appendChild(pageTitle);
+
+        let gridContainer = document.createElement('div');
+        gridContainer.className = 'matches-grid';
+
+        let allTeamsSelected = true;
+
+        for (let i = 0; i < 2; i++) {
+            let matchKey = "Match_" + (200 + i);
+            let mData = matches[matchKey] || {};
+            let team1 = mData.Team1 || "";
+            let team2 = mData.Team2 || "";
+            let winner = sfWinners[i] || mData.Winner || "";
+            let isOver = mData.IsOver || false;
+            let hasStarted = mData.Runs !== undefined || mData.BatTeam || isOver;
+
+            if (!team1 || !team2) {
+                allTeamsSelected = false;
+            }
+
+            let card = document.createElement('div');
+            card.className = 'card';
+
+            let cardHtml = `<div class="match-title">Semi Final ${i + 1}</div>`;
+
+            cardHtml += `<select class="select-box" id="t1_${i}" ${hasStarted ? 'disabled' : ''}>`;
+            cardHtml += `<option value="">Select Team</option>`;
+            teamList.forEach(t => {
+                let sel = (t === team1) ? 'selected' : '';
+                cardHtml += `<option value="${t}" ${sel}>${t}</option>`;
+            });
+            cardHtml += `</select>`;
+
+            cardHtml += `<div class="vs-text">Vs</div>`;
+
+            cardHtml += `<select class="select-box" id="t2_${i}" ${hasStarted ? 'disabled' : ''}>`;
+            cardHtml += `<option value="">Select Team</option>`;
+            teamList.forEach(t => {
+                let sel = (t === team2) ? 'selected' : '';
+                cardHtml += `<option value="${t}" ${sel}>${t}</option>`;
+            });
+            cardHtml += `</select>`;
+
+            let winBgStyle = "";
+            let winHeaderColor = "#C2185B";
+            let winNameText = "None";
+            if (winner) {
+                winBgStyle = "background: linear-gradient(to right, #FF8F00, #FFD54F); padding: 12px; border-radius: 10px;";
+                winHeaderColor = "#3E2723";
+                winNameText = winner;
+            }
+
+            cardHtml += `
+                <div class="winner-row">
+                    <div class="manual-col">
+                        <div class="manual-label">Manually select winner</div>
+                        <div class="btn-sub-layout">
+                            <button class="win-btn" id="win1_${i}">Team 1 Win</button>
+                            <button class="win-btn" id="win2_${i}">Team 2 Win</button>
+                        </div>
+                        <button class="reset-btn" id="reset_${i}">Reset Match</button>
+                    </div>
+                    <div class="winner-col" id="winCol_${i}" style="${winBgStyle}">
+                        <div class="winner-header" id="winHead_${i}" style="color: ${winHeaderColor};">Winner:</div>
+                        <div class="winner-name" id="winName_${i}">${winNameText}</div>
+                    </div>
+                </div>
+            `;
+
+            let btnBg = '#F57C00';
+            let btnText = 'Start Match';
+            if (winner || isOver) {
+                btnBg = '#2E7D32';
+                btnText = 'Match Summary';
+            } else if (hasStarted) {
+                btnBg = '#C2185B';
+                btnText = 'Resume Match';
+            }
+
+            cardHtml += `<button class="action-btn" id="actionBtn_${i}" style="background: ${btnBg};">${btnText}</button>`;
+            card.innerHTML = cardHtml;
+            gridContainer.appendChild(card);
+        }
+
+        container.appendChild(gridContainer);
+
+        let bottomNav = document.createElement('div');
+        bottomNav.className = 'bottom-nav';
+        bottomNav.innerHTML = `
+            <button class="nav-btn" onclick="window.location.href='index.html'">Edit Players</button>
+            <button class="nav-btn" onclick="window.location.href='quarter.html?tour=${tourKey}'">Quarter Final</button>
+            <button class="nav-btn" onclick="window.location.href='index.html'">Home Page</button>
+        `;
+        container.appendChild(bottomNav);
+
+        let btnNextFinal = document.createElement('button');
+        btnNextFinal.className = 'next-btn';
+        btnNextFinal.style.background = allTeamsSelected ? '#E65100' : '#333333';
+        btnNextFinal.innerHTML = '➡️ NEXT TO FINAL';
+        
+        btnNextFinal.onclick = () => {
+            if (!allTeamsSelected) {
+                alert('Select all teams first');
+                return;
+            }
+            let nextTeams = [];
+            if (sfWinners[0]) nextTeams.push(sfWinners[0]);
+            if (sfWinners[1]) nextTeams.push(sfWinners[1]);
+
+            let query = `tour=${tourKey}&next_teams=` + encodeURIComponent(JSON.stringify(nextTeams));
+            window.location.href = `final.html?${query}`;
+        };
+        container.appendChild(btnNextFinal);
+
+        for (let i = 0; i < 2; i++) {
+            let matchIndex = 200 + i;
+            let sel1 = document.getElementById(`t1_${i}`);
+            let sel2 = document.getElementById(`t2_${i}`);
+
+            sel1.onchange = () => {
+                update(ref(db, `Tournaments/${tourKey}/Matches/Match_${matchIndex}`), { Team1: sel1.value });
+            };
+            sel2.onchange = () => {
+                update(ref(db, `Tournaments/${tourKey}/Matches/Match_${matchIndex}`), { Team2: sel2.value });
+            };
+
+            document.getElementById(`win1_${i}`).onclick = () => {
+                let t1 = sel1.value;
+                if (!t1) { alert('Please select Team 1 first!'); return; }
+                if (confirm(`Are you sure ${t1} is the winner?`)) {
+                    let updates = {};
+                    updates[`SemiFinal_Winner_${i}`] = t1;
+                    updates[`Matches/Match_${matchIndex}/IsOver`] = true;
+                    updates[`Matches/Match_${matchIndex}/Winner`] = t1;
+                    update(ref(db, `Tournaments/${tourKey}`), updates);
+                }
+            };
+
+            document.getElementById(`win2_${i}`).onclick = () => {
+                let t2 = sel2.value;
+                if (!t2) { alert('Please select Team 2 first!'); return; }
+                if (confirm(`Are you sure ${t2} is the winner?`)) {
+                    let updates = {};
+                    updates[`SemiFinal_Winner_${i}`] = t2;
+                    updates[`Matches/Match_${matchIndex}/IsOver`] = true;
+                    updates[`Matches/Match_${matchIndex}/Winner`] = t2;
+                    update(ref(db, `Tournaments/${tourKey}`), updates);
+                }
+            };
+
+            document.getElementById(`reset_${i}`).onclick = () => {
+                if (confirm('Are you sure you want to reset this match?')) {
+                    let updates = {};
+                    updates[`SemiFinal_Winner_${i}`] = null;
+                    updates[`Matches/Match_${matchIndex}`] = null;
+                    update(ref(db, `Tournaments/${tourKey}`), updates);
+                }
+            };
+
+            document.getElementById(`actionBtn_${i}`).onclick = () => {
+                let t1 = sel1.value;
+                let t2 = sel2.value;
+                if (!t1 || !t2) { alert('Please select both teams!'); return; }
+                if (t1 === t2) { alert('Both teams cannot be the same!'); return; }
+                window.location.href = `score.html?tour=${tourKey}&match=${matchIndex}&stage=Semi Final Match`;
+            };
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -3,89 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchBuzz: Live Scoreboard</title>
+    <title>MatchBuzz: Home</title>
     <style>
         body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 15px; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
-        .top-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #C8E6C9; }
-        .top-card h1 { margin: 0; font-size: 22px; }
-        
-        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 20px; }
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
-        .batting-team { color: #FFCC80; }
-        .bowling-team { color: #C5CAE9; }
-        .vs-text { color: #C5CAE9; font-size: 16px; }
-        
-        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .score-number { font-size: 56px; font-weight: bold; line-height: 1; }
-        .right-stats { text-align: right; }
-        .overs-text { font-size: 22px; font-weight: bold; color: #E8EAF6; }
-        .crr-text { font-size: 15px; color: #B2DFDB; }
-        .target-text { font-size: 16px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
-        
-        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; }
-        .over-label { color: #FFCC80; font-size: 13px; font-weight: bold; margin-right: 10px; }
-        .balls-container { display: flex; gap: 6px; overflow-x: auto; }
-        .ball-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 11px; font-weight: bold; flex-shrink: 0; }
-        
-        .divider { height: 2px; background: #5C6BC0; margin: 15px 0; }
-        
-        .info-layout { display: flex; justify-content: space-between; font-size: 17px; margin-bottom: 15px; }
-        .bowler-info { text-align: right; color: #FFEB3B; }
-        
-        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; display: none; white-space: pre-line; }
-        
-        .button-row { display: flex; gap: 10px; margin-top: 15px; }
-        .action-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
-        .btn-scorecard { background: #0F172A; }
-        .btn-back { background: #047857; }
+        .container { max-width: 1100px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .header h2 { margin: 0; color: #1A237E; font-size: 20px; }
+        .search-box { display: flex; margin-bottom: 20px; }
+        .search-box input { flex: 1; padding: 14px; border: none; border-radius: 8px 0 0 8px; outline: none; font-size: 15px; }
+        .search-box button { background: #1A237E; color: white; border: none; padding: 0 25px; border-radius: 0 8px 8px 0; font-weight: bold; cursor: pointer; }
+        #matchListContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); }
+        .card h3 { margin: 0 0 10px 0; color: #1A237E; font-size: 17px; }
+        .card p { margin: 0; color: #555; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="container" id="mainContainer">
-    <div class="top-card">
-        <h3 id="stageTitle">★ MATCH ★</h3>
-        <h1 id="tourName">LOADING...</h1>
+<div class="container">
+    <div class="header">
+        <h2>LIVE & RECENT MATCHES</h2>
+        <button onclick="location.reload()" style="background:#1A237E; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer;">🔄</button>
     </div>
 
-    <div class="score-card">
-        <div class="teams-row">
-            <div class="batting-team" id="batTeamName">TEAM A</div>
-            <div class="vs-text">VS</div>
-            <div class="bowling-team" id="bowlTeamName">TEAM B</div>
-        </div>
-
-        <div class="run-layout">
-            <div class="score-number">
-                <span id="runsVal">0</span>/<span id="wicketsVal">0</span>
-            </div>
-            <div class="right-stats">
-                <div class="target-text" id="targetBar" style="display: none;">Target: 0</div>
-                <div class="overs-text" id="oversVal">Overs: 0.0 / 20</div>
-                <div class="crr-text" id="crrVal">CRR: 0.00</div>
-            </div>
-        </div>
-
-        <div class="requirement-bar" id="reqBar"></div>
-
-        <div class="over-balls-row">
-            <div class="over-label">This Over:</div>
-            <div class="balls-container" id="ballsContainer"></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="info-layout">
-            <div id="battersInfo">• Batter 1 - 0(0)<br>• Batter 2 - 0(0)</div>
-            <div class="bowler-info" id="bowlerInfo">Bowler:<br>Bowler Name (0.0-0)</div>
-        </div>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search tournament or match..." onkeyup="filterMatches()">
+        <button>Search</button>
     </div>
 
-    <div class="button-row">
-        <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">FULL SCORE BOARD</button>
-        <button class="action-btn btn-back" id="backBtn">BACK TO HOME</button>
+    <div id="matchListContainer">
+        <div style="text-align: center; color: #666; padding: 20px; grid-column: 1 / -1;">Loading...</div>
     </div>
 </div>
 
@@ -106,157 +54,119 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const singleId = urlParams.get('single');
-    const tourKey = urlParams.get('tour');
-    const matchIndex = urlParams.get('match');
-    const stageName = urlParams.get('stage');
+    let allItems = [];
 
-    if (stageName) {
-        document.getElementById('stageTitle').innerText = `★ ${stageName.toUpperCase()} ★`;
-    } else if (singleId) {
-        document.getElementById('stageTitle').innerText = `★ SINGLE MATCH ★`;
-    }
+    const dbRef = ref(db);
+    onValue(dbRef, (snapshot) => {
+        allItems = [];
+        if (snapshot.exists()) {
+            let rootData = snapshot.val();
 
-    const backBtn = document.getElementById('backBtn');
-    if (singleId) {
-        backBtn.onclick = () => window.location.href = 'index.html';
-        backBtn.innerText = 'BACK TO HOME';
-    } else {
-        backBtn.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
-        backBtn.innerText = 'BACK TO TOURNAMENT';
-    }
-
-    if (singleId) {
-        const singleRef = ref(db, `MatchBuzz/SingleMatches/${singleId}`);
-        onValue(singleRef, (snapshot) => {
-            if (snapshot.exists()) {
-                let matchData = snapshot.val();
-                let mName = matchData.match_name || 'SINGLE MATCH';
-                let mId = matchData.match_id || singleId;
-                document.getElementById('tourName').innerText = `${mName.toUpperCase()} (${mId})`;
-
-                updateScoreboardUI(matchData);
+            if (rootData.MatchBuzz && rootData.MatchBuzz.SingleMatches) {
+                let singles = rootData.MatchBuzz.SingleMatches;
+                Object.keys(singles).forEach(key => {
+                    let match = singles[key];
+                    if (!match.is_game_over) {
+                        allItems.push({
+                            title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
+                            sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
+                            searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase(),
+                            action: () => {
+                                window.location.href = `score.html?single=${key}`;
+                            }
+                        });
+                    }
+                });
             }
-        });
-    } else if (tourKey && matchIndex !== null) {
-        const tourRef = ref(db, `Tournaments/${tourKey}`);
-        onValue(tourRef, (snapshot) => {
-            if (snapshot.exists()) {
-                let data = snapshot.val();
-                let tName = data.T_Name || tourKey;
-                document.getElementById('tourName').innerText = tName.toUpperCase();
 
-                let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
-                updateScoreboardUI(matchData);
+            if (rootData.Tournaments) {
+                let tournaments = rootData.Tournaments;
+                Object.keys(tournaments).forEach(tourKey => {
+                    if (tourKey.startsWith("Tour_")) {
+                        let tour = tournaments[tourKey];
+                        let tName = tour.T_Name || tourKey;
+                        let tId = tourKey.replace("Tour_", "");
+                        
+                        allItems.push({
+                            title: `🏆 ${tName.toUpperCase()} (${tId})`,
+                            sub: "Tournament in Progress - Click to continue",
+                            searchKey: `${tName} ${tId}`.toLowerCase(),
+                            action: () => {
+                                let matches = tour.Matches || {};
+                                
+                                let r16Done = true;
+                                for (let i = 0; i < 8; i++) {
+                                    let m = matches[`Match_${i}`] || {};
+                                    if (!m.Winner && !m.IsOver) {
+                                        r16Done = false;
+                                        break;
+                                    }
+                                }
+                                if (!r16Done) {
+                                    window.location.href = `round16.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                let qfDone = true;
+                                for (let i = 0; i < 4; i++) {
+                                    let m = matches[`Match_${100 + i}`] || {};
+                                    let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
+                                    if (!qfWinner && !m.IsOver) {
+                                        qfDone = false;
+                                        break;
+                                    }
+                                }
+                                if (!qfDone) {
+                                    window.location.href = `quater.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                let sfDone = true;
+                                for (let i = 0; i < 2; i++) {
+                                    let m = matches[`Match_${200 + i}`] || {};
+                                    let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
+                                    if (!sfWinner && !m.IsOver) {
+                                        sfDone = false;
+                                        break;
+                                    }
+                                }
+                                if (!sfDone) {
+                                    window.location.href = `semi.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                window.location.href = `final.html?tour=${tourKey}`;
+                            }
+                        });
+                    }
+                });
             }
-        });
-    }
+        }
+        renderList(allItems);
+    });
 
-    function updateScoreboardUI(matchData) {
-        let runs = matchData.Runs || matchData.runs || 0;
-        let wickets = matchData.Wickets || matchData.wickets || 0;
-        let balls = matchData.Balls || matchData.balls || 0;
-        let overs = matchData.Overs || matchData.overs || 0;
-        let maxOvers = matchData.OversLimit || matchData.oversLimit || "20";
-        let batTeam = matchData.BatTeam || matchData.batTeam || matchData.team1 || "Team A";
-        let team1 = matchData.Team1 || matchData.team1 || "Team A";
-        let team2 = matchData.Team2 || matchData.team2 || "Team B";
-        let bowlTeam = batTeam === team1 ? team2 : team1;
+    window.renderList = function(list) {
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '';
 
-        document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
-        document.getElementById('bowlTeamName').innerText = bowlTeam.toUpperCase();
-        document.getElementById('runsVal').innerText = runs;
-        document.getElementById('wicketsVal').innerText = wickets;
-        document.getElementById('oversVal').innerText = `Overs: ${overs}.${balls} / ${maxOvers}`;
-
-        let totalOversDecimal = overs + (balls / 6.0);
-        let crr = totalOversDecimal > 0 ? (runs / totalOversDecimal) : 0.0;
-        document.getElementById('crrVal').innerText = `CRR: ${crr.toFixed(2)}`;
-
-        let target = matchData.Target || matchData.target || 0;
-        let isOver = matchData.IsOver || matchData.isOver || matchData.is_game_over || false;
-        let i1Ended = matchData.I1Ended || matchData.i1Ended || matchData.isFirstInningsEnded || false;
-        let innings = matchData.Innings || matchData.innings || 1;
-        let resultMsg = matchData.ResultMsg || matchData.resultMsg || matchData.Winner || matchData.winner || "";
-
-        let reqBar = document.getElementById('reqBar');
-        let targetBar = document.getElementById('targetBar');
-
-        let maxOvInt = parseInt(maxOvers) || 20;
-        let totalBallsAllowed = maxOvInt * 6;
-        let ballsBowled = (overs * 6) + balls;
-
-        if (isOver) {
-            targetBar.style.display = 'block';
-            targetBar.innerText = `Target: ${target}`;
-            reqBar.style.display = 'block';
-            reqBar.innerText = resultMsg || "Match Over";
-        } else if (i1Ended || (innings === 1 && (wickets >= 10 || overs >= maxOvInt))) {
-            let currentTarget = target > 0 ? target : (runs + 1);
-            targetBar.style.display = 'block';
-            targetBar.innerText = `Target: ${currentTarget}`;
-            reqBar.style.display = 'block';
-            reqBar.innerText = `★ INNINGS BREAK ★\nTarget: ${currentTarget} Runs`;
-        } else if (innings >= 2) {
-            let currentTarget = target > 0 ? target : 0;
-            let ballsRemaining = totalBallsAllowed - ballsBowled;
-            if (ballsRemaining < 0) ballsRemaining = 0;
-            let runsNeeded = currentTarget - runs;
-            if (runsNeeded < 0) runsNeeded = 0;
-
-            targetBar.style.display = 'block';
-            targetBar.innerText = `Target: ${currentTarget}`;
-            reqBar.style.display = 'block';
-            reqBar.innerText = `Need ${runsNeeded} runs in ${ballsRemaining} balls`;
-        } else {
-            targetBar.style.display = 'none';
-            reqBar.style.display = 'none';
+        if (list.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px; grid-column: 1 / -1;">No match or tournament found.</div>';
+            return;
         }
 
-        let striker = matchData.Striker || matchData.striker || "Batter 1";
-        let nonStriker = matchData.NonStriker || matchData.nonStriker || "Batter 2";
-        let isS1Striker = matchData.IsStrikerS1 !== false && matchData.isStrikerS1 !== false;
-        let bowler = matchData.Bowler || matchData.bowler || "Bowler Name";
+        list.forEach(item => {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${item.title}</h3><p>${item.sub}</p>`;
+            card.onclick = item.action;
+            container.appendChild(card);
+        });
+    }
 
-        let batStats = matchData.BatsmanStats || matchData.batsmanStats || {};
-        let s1Runs = batStats[striker] ? (batStats[striker].Runs || batStats[striker].runs || 0) : 0;
-        let s1Balls = batStats[striker] ? (batStats[striker].Balls || batStats[striker].balls || 0) : 0;
-        let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || batStats[nonStriker].runs || 0) : 0;
-        let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || batStats[nonStriker].balls || 0) : 0;
-
-        let p1Line = `• ${striker}${isS1Striker ? '*' : ''} - ${s1Runs}(${s1Balls})`;
-        let p2Line = `• ${nonStriker}${!isS1Striker ? '*' : ''} - ${s2Runs}(${s2Balls})`;
-        document.getElementById('battersInfo').innerHTML = `${p1Line}<br>${p2Line}`;
-
-        let bowlStats = matchData.BowlerStats || matchData.bowlerStats || {};
-        let bObj = bowlStats[bowler] || {};
-        let bRuns = bObj.Runs || bObj.runs || 0;
-        let bWickets = bObj.Wickets || bObj.wickets || 0;
-        let bBallsCount = bObj.Balls || bObj.balls || 0;
-        let bOv = Math.floor(bBallsCount / 6);
-        let bBl = bBallsCount % 6;
-        document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
-
-        let overBallsStr = matchData.OverBalls || matchData.overBalls || "";
-        let ballsContainer = document.getElementById('ballsContainer');
-        ballsContainer.innerHTML = '';
-        if (overBallsStr) {
-            let ballArray = overBallsStr.split(',');
-            ballArray.forEach(ball => {
-                if (ball) {
-                    let span = document.createElement('span');
-                    span.className = 'ball-circle';
-                    span.innerText = ball;
-                    if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
-                    else if (ball.includes('4')) span.style.background = '#1D4ED8';
-                    else if (ball.includes('6')) span.style.background = '#7E22CE';
-                    else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
-                    else span.style.background = '#334155';
-                    ballsContainer.appendChild(span);
-                }
-            });
-        }
+    window.filterMatches = function() {
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = allItems.filter(item => item.searchKey.includes(query));
+        renderList(filtered);
     }
 </script>
 

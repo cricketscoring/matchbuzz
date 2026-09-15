@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Grand Final</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #FFF3E0; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; padding-bottom: 30px; }
+        .back-btn { background: transparent; color: #0D47A1; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; margin-bottom: 10px; }
+        .tour-banner { background: linear-gradient(to bottom, #0D47A1, #1A237E); border: 3px solid #FFD700; border-radius: 16px; padding: 25px 30px; text-align: center; margin-bottom: 20px; }
+        .tour-badge { color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
+        .page-title { text-align: center; color: #E65100; font-size: 22px; font-weight: bold; margin-bottom: 20px; }
+        
+        .card { background: #FFFFFF; border: 2px solid #FFD700; border-radius: 16px; padding: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+        .match-title { color: #E65100; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+        
+        .winner-banner { background: linear-gradient(to right, #FF8F00, #FFD54F); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
+        .winner-label { color: #3E2723; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .winner-name { color: #1A237E; font-size: 22px; font-weight: bold; margin: 0; }
+        
+        .team-box { background: #FFF3E0; border: 1px solid #FFE082; border-radius: 12px; padding: 20px; text-align: center; color: #1A237E; font-size: 18px; font-weight: bold; margin: 5px 0; }
+        .vs-text { text-align: center; color: #D32F2F; font-size: 13px; font-weight: bold; margin: 5px 0; }
+        
+        .action-btn { width: 100%; border: none; border-radius: 12px; padding: 20px; font-size: 13px; font-weight: bold; color: #FFFFFF; cursor: pointer; margin-top: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div style="text-align: center; color: #666; padding: 40px;">Loading Grand Final...</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour') || 'Tour_0';
+    let nextTeamsParam = urlParams.get('next_teams');
+    let passedTeams = [];
+    try {
+        if (nextTeamsParam) passedTeams = JSON.parse(decodeURIComponent(nextTeamsParam));
+    } catch (e) {}
+
+    const tourRef = ref(db, `Tournaments/${tourKey}`);
+    onValue(tourRef, (snapshot) => {
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '';
+
+        let tName = "TOURNAMENT";
+        let matches = {};
+        let finalWinner = "";
+        let sfWinner0 = passedTeams[0] || "";
+        let sfWinner1 = passedTeams[1] || "";
+
+        if (snapshot.exists()) {
+            let data = snapshot.val();
+            tName = data.T_Name || tourKey;
+            matches = data.Matches || {};
+            if (data.Final_Winner_0) finalWinner = data.Final_Winner_0;
+            if (data.SemiFinal_Winner_0 && !sfWinner0) sfWinner0 = data.SemiFinal_Winner_0;
+            if (data.SemiFinal_Winner_1 && !sfWinner1) sfWinner1 = data.SemiFinal_Winner_1;
+        }
+
+        let matchIndex = 300;
+        let matchData = matches[`Match_${matchIndex}`] || {};
+
+        let team1 = matchData.Team1 || sfWinner0 || "TBD";
+        let team2 = matchData.Team2 || sfWinner1 || "TBD";
+        let winner = finalWinner || matchData.Winner || "";
+        let isOver = matchData.IsOver || false;
+        let hasStarted = matchData.Runs !== undefined || matchData.BatTeam || isOver;
+
+        let btnBack = document.createElement('button');
+        btnBack.className = 'back-btn';
+        btnBack.innerHTML = '← Back';
+        btnBack.onclick = () => window.location.href = `semi.html?tour=${tourKey}`;
+        container.appendChild(btnBack);
+
+        let tourBanner = document.createElement('div');
+        tourBanner.className = 'tour-banner';
+        tourBanner.innerHTML = `<div class="tour-badge">★ GRAND FINAL ★</div><h2>${tName.toUpperCase()}</h2>`;
+        container.appendChild(tourBanner);
+
+        let pageTitle = document.createElement('div');
+        pageTitle.className = 'page-title';
+        pageTitle.innerHTML = 'CHAMPIONSHIP FINAL - LIVE';
+        container.appendChild(pageTitle);
+
+        let card = document.createElement('div');
+        card.className = 'card';
+
+        let cardHtml = `<div class="match-title">Grand Final Match</div>`;
+
+        if (winner) {
+            cardHtml += `
+                <div class="winner-banner">
+                    <div class="winner-label">🏆 TOURNAMENT CHAMPION 🏆</div>
+                    <h2 class="winner-name">${winner}</h2>
+                </div>
+            `;
+        }
+
+        cardHtml += `
+            <div>
+                <div class="team-box">${team1}</div>
+                <div class="vs-text">Vs</div>
+                <div class="team-box">${team2}</div>
+            </div>
+        `;
+
+        let btnBg = '#78909C';
+        let btnText = 'ENTER SCORE BOARD (Not started)';
+        if (winner || isOver) {
+            btnBg = '#E65100';
+            btnText = 'MATCH SUMMARY';
+        } else if (hasStarted) {
+            btnBg = '#C2185B';
+            btnText = 'WATCH LIVE';
+        }
+
+        cardHtml += `<button class="action-btn" style="background: ${btnBg};">${btnText}</button>`;
+        card.innerHTML = cardHtml;
+
+        card.querySelector('.action-btn').onclick = () => {
+            window.location.href = `score.html?tour=${tourKey}&match=${matchIndex}&stage=Grand Final Match`;
+        };
+
+        container.appendChild(card);
+    });
+</script>
+
+</body>
+</html>

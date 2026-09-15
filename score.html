@@ -6,39 +6,40 @@
     <title>MatchBuzz: Live Scoreboard</title>
     <style>
         body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 15px; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
-        .top-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #C8E6C9; }
-        .top-card h1 { margin: 0; font-size: 22px; }
+        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 15px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 8px; }
+        .top-card h3 { margin: 0 0 3px 0; font-size: 13px; color: #C8E6C9; }
+        .top-card h1 { margin: 0; font-size: 20px; }
         
-        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 20px; }
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
+        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 15px 20px; color: #FFFFFF; margin-bottom: 10px; }
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 20px; font-weight: bold; }
         .batting-team { color: #FFCC80; }
         .bowling-team { color: #C5CAE9; }
         .vs-text { color: #C5CAE9; font-size: 16px; }
         
-        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .score-number { font-size: 56px; font-weight: bold; line-height: 1; }
+        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .score-number { font-size: 52px; font-weight: bold; line-height: 1; }
         .right-stats { text-align: right; }
         .overs-text { font-size: 22px; font-weight: bold; color: #E8EAF6; }
         .crr-text { font-size: 15px; color: #B2DFDB; }
         .target-text { font-size: 16px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
         
-        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; }
+        .over-balls-row { display: flex; align-items: center; margin-bottom: 12px; }
         .over-label { color: #FFCC80; font-size: 13px; font-weight: bold; margin-right: 10px; }
         .balls-container { display: flex; gap: 6px; overflow-x: auto; }
-        .ball-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+        .ball-circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 11px; font-weight: bold; flex-shrink: 0; }
         
-        .divider { height: 2px; background: #5C6BC0; margin: 15px 0; }
+        .divider { height: 2px; background: #5C6BC0; margin: 10px 0; }
         
-        .info-layout { display: flex; justify-content: space-between; font-size: 17px; margin-bottom: 15px; }
+        .info-layout { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 5px; }
         .bowler-info { text-align: right; color: #FFEB3B; }
         
-        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; display: none; white-space: pre-line; }
+        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 12px; border-radius: 10px; text-align: center; font-size: 17px; font-weight: bold; margin-bottom: 12px; display: none; white-space: pre-line; }
         
-        .button-row { display: flex; gap: 10px; margin-top: 15px; }
-        .action-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .button-row { display: flex; gap: 10px; margin-top: 8px; }
+        .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
         .btn-scorecard { background: #0F172A; }
+        .btn-fullscreen { background: #1E293B; }
         .btn-back { background: #047857; }
     </style>
 </head>
@@ -84,8 +85,9 @@
     </div>
 
     <div class="button-row">
-        <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">FULL SCORE BOARD</button>
-        <button class="action-btn btn-back" id="backBtn">BACK TO HOME</button>
+        <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">Scorecard</button>
+        <button class="action-btn btn-fullscreen" id="fullscreenBtn">Full screen mode</button>
+        <button class="action-btn btn-back" id="backBtn">Back to tournament</button>
     </div>
 </div>
 
@@ -121,10 +123,51 @@
     const backBtn = document.getElementById('backBtn');
     if (singleId) {
         backBtn.onclick = () => window.location.href = 'index.html';
-        backBtn.innerText = 'BACK TO HOME';
+        backBtn.innerText = 'Back to Home';
     } else {
-        backBtn.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
-        backBtn.innerText = 'BACK TO TOURNAMENT';
+        let mIdx = parseInt(matchIndex) || 0;
+        let targetPage = 'round16.html';
+        let pageTitleText = 'Back to Round of 16';
+
+        if (mIdx >= 300) {
+            targetPage = 'final.html';
+            pageTitleText = 'Back to Grand Final';
+        } else if (mIdx >= 200) {
+            targetPage = 'semi.html';
+            pageTitleText = 'Back to Semi-Finals';
+        } else if (mIdx >= 100) {
+            targetPage = 'quater.html';
+            pageTitleText = 'Back to Quarter-Finals';
+        } else {
+            targetPage = 'round16.html';
+            pageTitleText = 'Back to Round of 16';
+        }
+
+        backBtn.onclick = () => window.location.href = `${targetPage}?tour=${tourKey}`;
+        backBtn.innerText = pageTitleText;
+    }
+
+    const fsBtn = document.getElementById('fullscreenBtn');
+    if (fsBtn) {
+        fsBtn.onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(err.message);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fsBtn.innerText = 'Minimize screen';
+            } else {
+                fsBtn.innerText = 'Full screen mode';
+            }
+        });
     }
 
     if (singleId) {
@@ -251,7 +294,7 @@
                     if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
                     else if (ball.includes('4')) span.style.background = '#1D4ED8';
                     else if (ball.includes('6')) span.style.background = '#7E22CE';
-                    else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
+                    else if (ball.includes('wd') || matchData.overBalls.includes('nb')) span.style.background = '#C2410C';
                     else span.style.background = '#334155';
                     ballsContainer.appendChild(span);
                 }

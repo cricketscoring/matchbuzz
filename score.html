@@ -85,7 +85,7 @@
 
     <div class="button-row">
         <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">FULL SCORE BOARD</button>
-        <button class="action-btn btn-back" id="backBtn">BACK TO TOURNAMENT</button>
+        <button class="action-btn btn-back" id="backBtn">BACK TO HOME</button>
     </div>
 </div>
 
@@ -107,126 +107,157 @@
     const db = getDatabase(app);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const tourKey = urlParams.get('tour') || 'Tour_0';
-    const matchIndex = urlParams.get('match') || '0';
+    const singleId = urlParams.get('single');
+    const tourKey = urlParams.get('tour');
+    const matchIndex = urlParams.get('match');
+    const stageName = urlParams.get('stage');
 
-    document.getElementById('backBtn').onclick = () => {
-        window.location.href = `round16.html?tour=${tourKey}`;
-    };
+    if (stageName) {
+        document.getElementById('stageTitle').innerText = `★ ${stageName.toUpperCase()} ★`;
+    } else if (singleId) {
+        document.getElementById('stageTitle').innerText = `★ SINGLE MATCH ★`;
+    }
 
-    const matchRef = ref(db, `Tournaments/${tourKey}`);
-    onValue(matchRef, (snapshot) => {
-        if (snapshot.exists()) {
-            let data = snapshot.val();
-            let tName = data.T_Name || tourKey;
-            document.getElementById('tourName').innerText = tName.toUpperCase();
+    const backBtn = document.getElementById('backBtn');
+    if (singleId) {
+        backBtn.onclick = () => window.location.href = 'index.html';
+        backBtn.innerText = 'BACK TO HOME';
+    } else {
+        backBtn.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
+        backBtn.innerText = 'BACK TO TOURNAMENT';
+    }
 
-            let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
-            
-            let runs = matchData.Runs || 0;
-            let wickets = matchData.Wickets || 0;
-            let balls = matchData.Balls || 0;
-            let overs = matchData.Overs || 0;
-            let maxOvers = matchData.OversLimit || matchData.overs || "20";
-            let batTeam = matchData.BatTeam || matchData.Team1 || "Team A";
-            let bowlTeam = batTeam === matchData.Team1 ? matchData.Team2 : matchData.Team1;
-            if (!bowlTeam) bowlTeam = "Team B";
+    if (singleId) {
+        const singleRef = ref(db, `MatchBuzz/SingleMatches/${singleId}`);
+        onValue(singleRef, (snapshot) => {
+            if (snapshot.exists()) {
+                let matchData = snapshot.val();
+                let mName = matchData.match_name || 'SINGLE MATCH';
+                let mId = matchData.match_id || singleId;
+                document.getElementById('tourName').innerText = `${mName.toUpperCase()} (${mId})`;
 
-            document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
-            document.getElementById('bowlTeamName').innerText = bowlTeam.toUpperCase();
-            document.getElementById('runsVal').innerText = runs;
-            document.getElementById('wicketsVal').innerText = wickets;
-            document.getElementById('oversVal').innerText = `Overs: ${overs}.${balls} / ${maxOvers}`;
-
-            let totalOversDecimal = overs + (balls / 6.0);
-            let crr = totalOversDecimal > 0 ? (runs / totalOversDecimal) : 0.0;
-            document.getElementById('crrVal').innerText = `CRR: ${crr.toFixed(2)}`;
-
-            let target = matchData.Target || matchData.target || 0;
-            let isOver = matchData.IsOver || matchData.isOver || false;
-            let i1Ended = matchData.I1Ended || matchData.i1Ended || matchData.isFirstInningsEnded || false;
-            let innings = matchData.Innings || matchData.innings || 1;
-            let resultMsg = matchData.ResultMsg || matchData.resultMsg || matchData.Winner || matchData.winner || "";
-
-            let reqBar = document.getElementById('reqBar');
-            let targetBar = document.getElementById('targetBar');
-
-            let maxOvInt = parseInt(maxOvers) || 20;
-            let totalBallsAllowed = maxOvInt * 6;
-            let ballsBowled = (overs * 6) + balls;
-
-            if (isOver) {
-                targetBar.style.display = 'block';
-                targetBar.innerText = `Target: ${target}`;
-                reqBar.style.display = 'block';
-                reqBar.innerText = resultMsg || "Match Over";
-            } else if (i1Ended || (innings === 1 && (wickets >= 10 || overs >= maxOvInt))) {
-                let currentTarget = target > 0 ? target : (runs + 1);
-                targetBar.style.display = 'block';
-                targetBar.innerText = `Target: ${currentTarget}`;
-                reqBar.style.display = 'block';
-                reqBar.innerText = `★ INNINGS BREAK ★\nTarget: ${currentTarget} Runs`;
-            } else if (innings >= 2) {
-                let currentTarget = target > 0 ? target : 0;
-                let ballsRemaining = totalBallsAllowed - ballsBowled;
-                if (ballsRemaining < 0) ballsRemaining = 0;
-                let runsNeeded = currentTarget - runs;
-                if (runsNeeded < 0) runsNeeded = 0;
-
-                targetBar.style.display = 'block';
-                targetBar.innerText = `Target: ${currentTarget}`;
-                reqBar.style.display = 'block';
-                reqBar.innerText = `Need ${runsNeeded} runs in ${ballsRemaining} balls`;
-            } else {
-                targetBar.style.display = 'none';
-                reqBar.style.display = 'none';
+                updateScoreboardUI(matchData);
             }
+        });
+    } else if (tourKey && matchIndex !== null) {
+        const tourRef = ref(db, `Tournaments/${tourKey}`);
+        onValue(tourRef, (snapshot) => {
+            if (snapshot.exists()) {
+                let data = snapshot.val();
+                let tName = data.T_Name || tourKey;
+                document.getElementById('tourName').innerText = tName.toUpperCase();
 
-            let striker = matchData.Striker || matchData.striker || "Batter 1";
-            let nonStriker = matchData.NonStriker || matchData.nonStriker || "Batter 2";
-            let isS1Striker = matchData.IsStrikerS1 !== false && matchData.isStrikerS1 !== false;
-            let bowler = matchData.Bowler || matchData.bowler || "Bowler Name";
-
-            let batStats = matchData.BatsmanStats || matchData.batsmanStats || {};
-            let s1Runs = batStats[striker] ? (batStats[striker].Runs || batStats[striker].runs || 0) : 0;
-            let s1Balls = batStats[striker] ? (batStats[striker].Balls || batStats[striker].balls || 0) : 0;
-            let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || batStats[nonStriker].runs || 0) : 0;
-            let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || batStats[nonStriker].balls || 0) : 0;
-
-            let p1Line = `• ${striker}${isS1Striker ? '*' : ''} - ${s1Runs}(${s1Balls})`;
-            let p2Line = `• ${nonStriker}${!isS1Striker ? '*' : ''} - ${s2Runs}(${s2Balls})`;
-            document.getElementById('battersInfo').innerHTML = `${p1Line}<br>${p2Line}`;
-
-            let bowlStats = matchData.BowlerStats || matchData.bowlerStats || {};
-            let bObj = bowlStats[bowler] || {};
-            let bRuns = bObj.Runs || bObj.runs || 0;
-            let bWickets = bObj.Wickets || bObj.wickets || 0;
-            let bBallsCount = bObj.Balls || bObj.balls || 0;
-            let bOv = Math.floor(bBallsCount / 6);
-            let bBl = bBallsCount % 6;
-            document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
-
-            let overBallsStr = matchData.OverBalls || matchData.overBalls || "";
-            let ballsContainer = document.getElementById('ballsContainer');
-            ballsContainer.innerHTML = '';
-            if (overBallsStr) {
-                let ballArray = overBallsStr.split(',');
-                ballArray.forEach(ball => {
-                    if (ball) {
-                        let span = document.createElement('span');
-                        span.className = 'ball-circle';
-                        span.innerText = ball;
-                        if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
-                        else if (ball.includes('4')) span.style.background = '#1D4ED8';
-                        else if (ball.includes('6')) span.style.background = '#7E22CE';
-                        else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
-                        else span.style.background = '#334155';
-                        ballsContainer.appendChild(span);
-                    }
-                });
+                let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
+                updateScoreboardUI(matchData);
             }
+        });
+    }
+
+    function updateScoreboardUI(matchData) {
+        let runs = matchData.Runs || matchData.runs || 0;
+        let wickets = matchData.Wickets || matchData.wickets || 0;
+        let balls = matchData.Balls || matchData.balls || 0;
+        let overs = matchData.Overs || matchData.overs || 0;
+        let maxOvers = matchData.OversLimit || matchData.oversLimit || "20";
+        let batTeam = matchData.BatTeam || matchData.batTeam || matchData.team1 || "Team A";
+        let team1 = matchData.Team1 || matchData.team1 || "Team A";
+        let team2 = matchData.Team2 || matchData.team2 || "Team B";
+        let bowlTeam = batTeam === team1 ? team2 : team1;
+
+        document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
+        document.getElementById('bowlTeamName').innerText = bowlTeam.toUpperCase();
+        document.getElementById('runsVal').innerText = runs;
+        document.getElementById('wicketsVal').innerText = wickets;
+        document.getElementById('oversVal').innerText = `Overs: ${overs}.${balls} / ${maxOvers}`;
+
+        let totalOversDecimal = overs + (balls / 6.0);
+        let crr = totalOversDecimal > 0 ? (runs / totalOversDecimal) : 0.0;
+        document.getElementById('crrVal').innerText = `CRR: ${crr.toFixed(2)}`;
+
+        let target = matchData.Target || matchData.target || 0;
+        let isOver = matchData.IsOver || matchData.isOver || matchData.is_game_over || false;
+        let i1Ended = matchData.I1Ended || matchData.i1Ended || matchData.isFirstInningsEnded || false;
+        let innings = matchData.Innings || matchData.innings || 1;
+        let resultMsg = matchData.ResultMsg || matchData.resultMsg || matchData.Winner || matchData.winner || "";
+
+        let reqBar = document.getElementById('reqBar');
+        let targetBar = document.getElementById('targetBar');
+
+        let maxOvInt = parseInt(maxOvers) || 20;
+        let totalBallsAllowed = maxOvInt * 6;
+        let ballsBowled = (overs * 6) + balls;
+
+        if (isOver) {
+            targetBar.style.display = 'block';
+            targetBar.innerText = `Target: ${target}`;
+            reqBar.style.display = 'block';
+            reqBar.innerText = resultMsg || "Match Over";
+        } else if (i1Ended || (innings === 1 && (wickets >= 10 || overs >= maxOvInt))) {
+            let currentTarget = target > 0 ? target : (runs + 1);
+            targetBar.style.display = 'block';
+            targetBar.innerText = `Target: ${currentTarget}`;
+            reqBar.style.display = 'block';
+            reqBar.innerText = `★ INNINGS BREAK ★\nTarget: ${currentTarget} Runs`;
+        } else if (innings >= 2) {
+            let currentTarget = target > 0 ? target : 0;
+            let ballsRemaining = totalBallsAllowed - ballsBowled;
+            if (ballsRemaining < 0) ballsRemaining = 0;
+            let runsNeeded = currentTarget - runs;
+            if (runsNeeded < 0) runsNeeded = 0;
+
+            targetBar.style.display = 'block';
+            targetBar.innerText = `Target: ${currentTarget}`;
+            reqBar.style.display = 'block';
+            reqBar.innerText = `Need ${runsNeeded} runs in ${ballsRemaining} balls`;
+        } else {
+            targetBar.style.display = 'none';
+            reqBar.style.display = 'none';
         }
-    });
+
+        let striker = matchData.Striker || matchData.striker || "Batter 1";
+        let nonStriker = matchData.NonStriker || matchData.nonStriker || "Batter 2";
+        let isS1Striker = matchData.IsStrikerS1 !== false && matchData.isStrikerS1 !== false;
+        let bowler = matchData.Bowler || matchData.bowler || "Bowler Name";
+
+        let batStats = matchData.BatsmanStats || matchData.batsmanStats || {};
+        let s1Runs = batStats[striker] ? (batStats[striker].Runs || batStats[striker].runs || 0) : 0;
+        let s1Balls = batStats[striker] ? (batStats[striker].Balls || batStats[striker].balls || 0) : 0;
+        let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || batStats[nonStriker].runs || 0) : 0;
+        let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || batStats[nonStriker].balls || 0) : 0;
+
+        let p1Line = `• ${striker}${isS1Striker ? '*' : ''} - ${s1Runs}(${s1Balls})`;
+        let p2Line = `• ${nonStriker}${!isS1Striker ? '*' : ''} - ${s2Runs}(${s2Balls})`;
+        document.getElementById('battersInfo').innerHTML = `${p1Line}<br>${p2Line}`;
+
+        let bowlStats = matchData.BowlerStats || matchData.bowlerStats || {};
+        let bObj = bowlStats[bowler] || {};
+        let bRuns = bObj.Runs || bObj.runs || 0;
+        let bWickets = bObj.Wickets || bObj.wickets || 0;
+        let bBallsCount = bObj.Balls || bObj.balls || 0;
+        let bOv = Math.floor(bBallsCount / 6);
+        let bBl = bBallsCount % 6;
+        document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
+
+        let overBallsStr = matchData.OverBalls || matchData.overBalls || "";
+        let ballsContainer = document.getElementById('ballsContainer');
+        ballsContainer.innerHTML = '';
+        if (overBallsStr) {
+            let ballArray = overBallsStr.split(',');
+            ballArray.forEach(ball => {
+                if (ball) {
+                    let span = document.createElement('span');
+                    span.className = 'ball-circle';
+                    span.innerText = ball;
+                    if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
+                    else if (ball.includes('4')) span.style.background = '#1D4ED8';
+                    else if (ball.includes('6')) span.style.background = '#7E22CE';
+                    else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
+                    else span.style.background = '#334155';
+                    ballsContainer.appendChild(span);
+                }
+            });
+        }
+    }
 </script>
 
 </body>

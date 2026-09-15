@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Live Scoreboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 15px; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
+        .top-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #C8E6C9; }
+        .top-card h1 { margin: 0; font-size: 22px; }
+        
+        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 20px; }
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
+        .batting-team { color: #FFCC80; }
+        .bowling-team { color: #C5CAE9; }
+        .vs-text { color: #C5CAE9; font-size: 16px; }
+        
+        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .score-number { font-size: 56px; font-weight: bold; line-height: 1; }
+        .right-stats { text-align: right; }
+        .overs-text { font-size: 22px; font-weight: bold; color: #E8EAF6; }
+        .crr-text { font-size: 15px; color: #B2DFDB; }
+        .target-text { font-size: 16px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
+        
+        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; }
+        .over-label { color: #FFCC80; font-size: 13px; font-weight: bold; margin-right: 10px; }
+        .balls-container { display: flex; gap: 6px; overflow-x: auto; }
+        .ball-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+        
+        .divider { height: 2px; background: #5C6BC0; margin: 15px 0; }
+        
+        .info-layout { display: flex; justify-content: space-between; font-size: 17px; margin-bottom: 15px; }
+        .bowler-info { text-align: right; color: #FFEB3B; }
+        
+        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; display: none; }
+        
+        .button-row { display: flex; gap: 10px; margin-top: 15px; }
+        .action-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .btn-scorecard { background: #0F172A; }
+        .btn-back { background: #047857; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div class="top-card">
+        <h3 id="stageTitle">★ MATCH ★</h3>
+        <h1 id="tourName">LOADING...</h1>
+    </div>
+
+    <div class="score-card">
+        <div class="teams-row">
+            <div class="batting-team" id="batTeamName">TEAM A</div>
+            <div class="vs-text">VS</div>
+            <div class="bowling-team" id="bowlTeamName">TEAM B</div>
+        </div>
+
+        <div class="run-layout">
+            <div class="score-number">
+                <span id="runsVal">0</span>/<span id="wicketsVal">0</span>
+            </div>
+            <div class="right-stats">
+                <div class="target-text" id="targetBar" style="display: none;">Target: 0</div>
+                <div class="overs-text" id="oversVal">Overs: 0.0 / 20</div>
+                <div class="crr-text" id="crrVal">CRR: 0.00</div>
+            </div>
+        </div>
+
+        <div class="requirement-bar" id="reqBar"></div>
+
+        <div class="over-balls-row">
+            <div class="over-label">This Over:</div>
+            <div class="balls-container" id="ballsContainer"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="info-layout">
+            <div id="battersInfo">• Batter 1 - 0(0)<br>• Batter 2 - 0(0)</div>
+            <div class="bowler-info" id="bowlerInfo">Bowler:<br>Bowler Name (0.0-0)</div>
+        </div>
+    </div>
+
+    <div class="button-row">
+        <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">FULL SCORE BOARD</button>
+        <button class="action-btn btn-back" id="backBtn">BACK TO TOURNAMENT</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour') || 'Tour_0';
+    const matchIndex = urlParams.get('match') || '0';
+
+    document.getElementById('backBtn').onclick = () => {
+        window.location.href = `round16.html?tour=${tourKey}`;
+    };
+
+    const matchRef = ref(db, `Tournaments/${tourKey}`);
+    onValue(matchRef, (snapshot) => {
+        if (snapshot.exists()) {
+            let data = snapshot.val();
+            let tName = data.T_Name || tourKey;
+            document.getElementById('tourName').innerText = tName.toUpperCase();
+
+            let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
+            
+            let runs = matchData.Runs || 0;
+            let wickets = matchData.Wickets || 0;
+            let balls = matchData.Balls || 0;
+            let overs = matchData.Overs || 0;
+            let maxOvers = matchData.OversLimit || "20";
+            let batTeam = matchData.BatTeam || matchData.Team1 || "Team A";
+            let bowlTeam = batTeam === matchData.Team1 ? matchData.Team2 : matchData.Team1;
+            if (!bowlTeam) bowlTeam = "Team B";
+
+            document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
+            document.getElementById('bowlTeamName').innerText = bowlTeam.toUpperCase();
+            document.getElementById('runsVal').innerText = runs;
+            document.getElementById('wicketsVal').innerText = wickets;
+            document.getElementById('oversVal').innerText = `Overs: ${overs}.${balls} / ${maxOvers}`;
+
+            let totalOversDecimal = overs + (balls / 6.0);
+            let crr = totalOversDecimal > 0 ? (runs / totalOversDecimal) : 0.0;
+            document.getElementById('crrVal').innerText = `CRR: ${crr.toFixed(2)}`;
+
+            let target = matchData.Target || 0;
+            let isOver = matchData.IsOver || false;
+            let resultMsg = matchData.ResultMsg || matchData.Winner || "";
+
+            if (target > 0 || isOver) {
+                document.getElementById('targetBar').style.display = 'block';
+                document.getElementById('targetBar').innerText = `Target: ${target}`;
+            }
+
+            if (isOver && resultMsg) {
+                let reqBar = document.getElementById('reqBar');
+                reqBar.style.display = 'block';
+                reqBar.innerText = resultMsg;
+            }
+
+            let striker = matchData.Striker || "Batter 1";
+            let nonStriker = matchData.NonStriker || "Batter 2";
+            let isS1Striker = matchData.IsStrikerS1 !== false;
+            let bowler = matchData.Bowler || "Bowler Name";
+
+            let batStats = matchData.BatsmanStats || {};
+            let s1Runs = batStats[striker] ? (batStats[striker].Runs || batStats[striker].runs || 0) : 0;
+            let s1Balls = batStats[striker] ? (batStats[striker].Balls || batStats[striker].balls || 0) : 0;
+            let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || batStats[nonStriker].runs || 0) : 0;
+            let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || batStats[nonStriker].balls || 0) : 0;
+
+            let p1Line = `• ${striker}${isS1Striker ? '*' : ''} - ${s1Runs}(${s1Balls})`;
+            let p2Line = `• ${nonStriker}${!isS1Striker ? '*' : ''} - ${s2Runs}(${s2Balls})`;
+            document.getElementById('battersInfo').innerHTML = `${p1Line}<br>${p2Line}`;
+
+            let bowlStats = matchData.BowlerStats || {};
+            let bObj = bowlStats[bowler] || {};
+            let bRuns = bObj.Runs || bObj.runs || 0;
+            let bWickets = bObj.Wickets || bObj.wickets || 0;
+            let bBallsCount = bObj.Balls || bObj.balls || 0;
+            let bOv = Math.floor(bBallsCount / 6);
+            let bBl = bBallsCount % 6;
+            document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
+
+            let overBallsStr = matchData.OverBalls || "";
+            let ballsContainer = document.getElementById('ballsContainer');
+            ballsContainer.innerHTML = '';
+            if (overBallsStr) {
+                let ballArray = overBallsStr.split(',');
+                ballArray.forEach(ball => {
+                    if (ball) {
+                        let span = document.createElement('span');
+                        span.className = 'ball-circle';
+                        span.innerText = ball;
+                        if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
+                        else if (ball.includes('4')) span.style.background = '#1D4ED8';
+                        else if (ball.includes('6')) span.style.background = '#7E22CE';
+                        else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
+                        else span.style.background = '#334155';
+                        ballsContainer.appendChild(span);
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

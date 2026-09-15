@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Round of 16</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; padding-bottom: 30px; }
+        .back-btn { background: transparent; color: #1A237E; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -10px; margin-bottom: -10px; }
+        .tour-banner { background: #1A237E; border: 3px solid #3F51B5; border-radius: 16px; padding: 25px 30px; text-align: center; margin: 10px 0 20px 0; }
+        .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
+        .page-title { text-align: center; color: #1B5E20; font-size: 22px; font-weight: bold; margin-bottom: 20px; }
+        .card { background: #FFFFFF; border: 2px solid #4CAF50; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .match-title { color: #1B5E20; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+        .winner-banner { background: linear-gradient(to right, #FF8F00, #FFD54F); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; }
+        .winner-label { color: #3E2723; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .winner-name { color: #1A237E; font-size: 22px; font-weight: bold; margin: 0; }
+        .team-box { background: #F1F8E9; border: 1px solid #C8E6C9; border-radius: 12px; padding: 20px; text-align: center; color: #1A237E; font-size: 18px; font-weight: bold; margin: 5px 0; }
+        .vs-text { text-align: center; color: #D32F2F; font-size: 13px; font-weight: bold; margin: 5px 0; }
+        .action-btn { width: 100%; border: none; border-radius: 12px; padding: 20px; font-size: 13px; font-weight: bold; color: #FFFFFF; cursor: pointer; margin-top: 10px; }
+        .next-btn { width: 100%; border: none; border-radius: 16px; padding: 25px; font-size: 14px; font-weight: bold; color: #FFFFFF; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div style="text-align: center; color: #666; padding: 40px;">Loading Round of 16...</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour') || 'Tour_0';
+
+    const tourRef = ref(db, `Tournaments/${tourKey}`);
+    onValue(tourRef, (snapshot) => {
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '';
+
+        let tName = "TOURNAMENT";
+        let matches = {};
+
+        if (snapshot.exists()) {
+            let data = snapshot.val();
+            tName = data.T_Name || tourKey;
+            matches = data.Matches || {};
+        }
+
+        let btnBack = document.createElement('button');
+        btnBack.className = 'back-btn';
+        btnBack.innerHTML = '←';
+        btnBack.onclick = () => window.location.href = 'index.html';
+        container.appendChild(btnBack);
+
+        let tourBanner = document.createElement('div');
+        tourBanner.className = 'tour-banner';
+        tourBanner.innerHTML = `<h2>${tName.toUpperCase()}</h2>`;
+        container.appendChild(tourBanner);
+
+        let pageTitle = document.createElement('div');
+        pageTitle.className = 'page-title';
+        pageTitle.innerHTML = 'ROUND OF 16 - LIVE MATCHES';
+        container.appendChild(pageTitle);
+
+        let allR16Done = true;
+
+        for (let i = 0; i < 16; i++) {
+            let matchKey = "Match_" + i;
+            let mData = matches[matchKey] || {};
+            let team1 = mData.Team1 || "TBD";
+            let team2 = mData.Team2 || "TBD";
+            let winner = mData.Winner || "";
+            let isOver = mData.IsOver || false;
+
+            if (!winner && !isOver) {
+                allR16Done = false;
+            }
+
+            let card = document.createElement('div');
+            card.className = 'card';
+
+            let cardHtml = `<div class="match-title">Match ${i + 1}</div>`;
+
+            if (winner) {
+                cardHtml += `
+                    <div class="winner-banner">
+                        <div class="winner-label">🏆 WINNER 🏆</div>
+                        <h2 class="winner-name">${winner}</h2>
+                    </div>
+                `;
+            }
+
+            cardHtml += `
+                <div class="team-box">${team1}</div>
+                <div class="vs-text">Vs</div>
+                <div class="team-box">${team2}</div>
+            `;
+
+            let btnBg = '#78909C';
+            let btnText = 'ENTER SCORE BOARD (Not started)';
+            if (winner || isOver) {
+                btnBg = '#2E7D32';
+                btnText = 'MATCH SUMMARY';
+            } else if (mData.Runs !== undefined || mData.BatTeam) {
+                btnBg = '#C2185B';
+                btnText = 'WATCH LIVE';
+            }
+
+            cardHtml += `<button class="action-btn" style="background: ${btnBg};">${btnText}</button>`;
+            card.innerHTML = cardHtml;
+            container.appendChild(card);
+        }
+
+        let btnNextRound = document.createElement('button');
+        btnNextRound.className = 'next-btn';
+        btnNextRound.style.background = allR16Done ? '#2E7D32' : '#546E7A';
+        btnNextRound.innerHTML = allR16Done ? '➡️ Proceed to Quarter-Finals' : '🔒 Proceed to Quarter-Finals (Complete all matches)';
+        
+        btnNextRound.onclick = () => {
+            if (allR16Done) {
+                alert('Proceeding to Quarter-Finals!');
+            } else {
+                alert('Please finish all matches in this round!');
+            }
+        };
+
+        container.appendChild(btnNextRound);
+    });
+</script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchBuzz: Live Matches</title>
+    <title>MatchBuzz: Tournaments & Matches</title>
     <style>
         body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: auto; }
@@ -17,17 +17,18 @@
         .card:hover { transform: translateY(-3px); }
         .card h3 { margin: 0 0 10px 0; color: #1A237E; font-size: 17px; }
         .card p { margin: 0; color: #555; font-size: 14px; }
+        .back-btn { background: transparent; color: #1A237E; border: none; font-size: 20px; font-weight: bold; cursor: pointer; margin-bottom: 15px; padding: 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>LIVE & RECENT MATCHES</h2>
+        <h2 id="pageTitle">LIVE & RECENT MATCHES</h2>
         <button onclick="location.reload()" style="background:#1A237E; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer;">🔄</button>
     </div>
 
-    <div class="search-box">
+    <div id="searchSection" class="search-box">
         <input type="text" id="searchInput" placeholder="Search tournament, team or ID..." onkeyup="filterMatches()">
         <button>Search</button>
     </div>
@@ -54,82 +55,155 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let allMatches = [];
+    let globalData = null;
+    let currentView = 'main';
+    let selectedTourKey = null;
 
     const dbRef = ref(db);
     onValue(dbRef, (snapshot) => {
-        allMatches = [];
         if (snapshot.exists()) {
-            let rootData = snapshot.val();
-
-            if (rootData.MatchBuzz && rootData.MatchBuzz.SingleMatches) {
-                let singles = rootData.MatchBuzz.SingleMatches;
-                Object.keys(singles).forEach(key => {
-                    let match = singles[key];
-                    if (!match.is_game_over) {
-                        allMatches.push({
-                            title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
-                            sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
-                            searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase()
-                        });
-                    }
-                });
-            }
-
-            if (rootData.Tournaments) {
-                let tournaments = rootData.Tournaments;
-                Object.keys(tournaments).forEach(tourKey => {
-                    if (tourKey.startsWith("Tour_")) {
-                        let tour = tournaments[tourKey];
-                        let tName = tour.T_Name || tourKey;
-                        let matches = tour.Matches || {};
-                        
-                        Object.keys(matches).forEach(matchKey => {
-                            let mData = matches[matchKey];
-                            let winner = mData.Winner || "";
-                            let team1 = mData.Team1 || "TBD";
-                            let team2 = mData.Team2 || "TBD";
-                            let matchNum = matchKey.replace("Match_", "Match ");
-
-                            let subText = `Team: ${team1} vs ${team2}`;
-                            if (winner) {
-                                subText = `Winner: ${winner} | ${team1} vs ${team2}`;
-                            }
-
-                            allMatches.push({
-                                title: `🏆 ${tName.toUpperCase()} - ROUND OF 16 (${matchNum})`,
-                                sub: subText,
-                                searchKey: `${tName} ${matchNum} ${team1} ${team2} ${winner}`.toLowerCase()
-                            });
-                        });
-                    }
-                });
+            globalData = snapshot.val();
+            if (currentView === 'main') {
+                renderMainList();
+            } else if (currentView === 'tournament' && selectedTourKey) {
+                renderTournamentRound16(selectedTourKey);
             }
         }
-        renderMatchesList(allMatches);
     });
 
-    window.renderMatchesList = function(list) {
+    window.renderMainList = function() {
+        currentView = 'main';
+        selectedTourKey = null;
+        document.getElementById('pageTitle').innerText = "LIVE & RECENT MATCHES";
+        document.getElementById('searchSection').style.display = 'flex';
+        
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '';
 
-        if (list.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px; grid-column: 1 / -1;">No live match found.</div>';
+        let items = [];
+
+        if (globalData && globalData.MatchBuzz && globalData.MatchBuzz.SingleMatches) {
+            let singles = globalData.MatchBuzz.SingleMatches;
+            Object.keys(singles).forEach(key => {
+                let match = singles[key];
+                if (!match.is_game_over) {
+                    items.push({
+                        type: 'single',
+                        title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
+                        sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
+                        searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase()
+                    });
+                }
+            });
+        }
+
+        if (globalData && globalData.Tournaments) {
+            let tournaments = globalData.Tournaments;
+            Object.keys(tournaments).forEach(tourKey => {
+                if (tourKey.startsWith("Tour_")) {
+                    let tour = tournaments[tourKey];
+                    let tName = tour.T_Name || tourKey;
+                    let tId = tourKey.replace("Tour_", "");
+                    items.push({
+                        type: 'tournament',
+                        tourKey: tourKey,
+                        title: `🏆 ${tName.toUpperCase()} (${tId})`,
+                        sub: "Tournament in Progress - Click to view Round of 16",
+                        searchKey: `${tName} ${tId}`.toLowerCase()
+                    });
+                }
+            });
+        }
+
+        if (items.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px; grid-column: 1 / -1;">No live match or tournament found.</div>';
             return;
         }
 
-        list.forEach(item => {
+        items.forEach(item => {
             let card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<h3>${item.title}</h3><p>${item.sub}</p>`;
+            
+            if (item.type === 'tournament') {
+                card.onclick = () => renderTournamentRound16(item.tourKey);
+            }
             container.appendChild(card);
         });
     }
 
+    window.renderTournamentRound16 = function(tourKey) {
+        currentView = 'tournament';
+        selectedTourKey = tourKey;
+        
+        if (!globalData || !globalData.Tournaments || !globalData.Tournaments[tourKey]) {
+            renderMainList();
+            return;
+        }
+
+        let tour = globalData.Tournaments[tourKey];
+        let tName = tour.T_Name || tourKey;
+        
+        document.getElementById('pageTitle').innerText = `${tName.toUpperCase()} - ROUND OF 16`;
+        document.getElementById('searchSection').style.display = 'none';
+
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '';
+
+        let backBtn = document.createElement('button');
+        backBtn.className = 'back-btn';
+        backBtn.innerHTML = '← Back to Matches';
+        backBtn.onclick = () => renderMainList();
+        container.appendChild(backBtn);
+
+        let matches = tour.Matches || {};
+        let allR16Done = true;
+        let matchElements = [];
+
+        for (let k = 0; k < 16; k++) {
+            let matchKey = "Match_" + k;
+            let mData = matches[matchKey] || {};
+            let team1 = mData.Team1 || "TBD";
+            let team2 = mData.Team2 || "TBD";
+            let winner = mData.Winner || "";
+            let isOver = mData.IsOver || false;
+
+            if (!winner && !isOver) {
+                allR16Done = false;
+            }
+
+            let card = document.createElement('div');
+            card.className = 'card';
+            
+            let subText = `Team: ${team1} vs ${team2}`;
+            if (winner) {
+                subText = `🏆 Winner: ${winner} | ${team1} vs ${team2}`;
+            } else if (isOver) {
+                subText = `Match Over | ${team1} vs ${team2}`;
+            }
+
+            card.innerHTML = `<h3>Match ${k + 1}</h3><p>${subText}</p>`;
+            matchElements.push(card);
+        }
+
+        matchElements.forEach(el => container.appendChild(el));
+
+        let nextCard = document.createElement('div');
+        nextCard.className = 'card';
+        nextCard.style.background = allR16Done ? '#2E7D32' : '#546E7A';
+        nextCard.style.color = '#FFFFFF';
+        nextCard.innerHTML = `<h3 style="color: #FFFFFF; text-align: center; margin: 0;">${allR16Done ? '➡️ Proceed to Quarter-Finals (All R16 Completed)' : '🔒 Quarter-Finals (Complete all R16 matches first)'}</h3>`;
+        container.appendChild(nextCard);
+    }
+
     window.filterMatches = function() {
+        if (currentView !== 'main') return;
         let query = document.getElementById('searchInput').value.toLowerCase();
-        let filtered = allMatches.filter(item => item.searchKey.includes(query));
-        renderMatchesList(filtered);
+        let cards = document.querySelectorAll('#matchListContainer .card');
+        cards.forEach(card => {
+            let text = card.innerText.toLowerCase();
+            card.style.display = text.includes(query) ? 'block' : 'none';
+        });
     }
 </script>
 

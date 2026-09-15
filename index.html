@@ -71,7 +71,9 @@
                             title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
                             sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
                             searchKey: `${match.match_name} ${match.match_id} ${match.team1} ${match.team2}`.toLowerCase(),
-                            action: () => {}
+                            action: () => {
+                                window.location.href = `score.html?single=${key}`;
+                            }
                         });
                     }
                 });
@@ -84,12 +86,56 @@
                         let tour = tournaments[tourKey];
                         let tName = tour.T_Name || tourKey;
                         let tId = tourKey.replace("Tour_", "");
+                        
                         allItems.push({
                             title: `🏆 ${tName.toUpperCase()} (${tId})`,
-                            sub: "Tournament in Progress - Click to view Round of 16",
+                            sub: "Tournament in Progress - Click to continue",
                             searchKey: `${tName} ${tId}`.toLowerCase(),
                             action: () => {
-                                window.location.href = `round16.html?tour=${tourKey}`;
+                                let matches = tour.Matches || {};
+                                
+                                let r16Done = true;
+                                for (let i = 0; i < 8; i++) {
+                                    let m = matches[`Match_${i}`] || {};
+                                    if (!m.Winner && !m.IsOver) {
+                                        r16Done = false;
+                                        break;
+                                    }
+                                }
+                                if (!r16Done) {
+                                    window.location.href = `round16.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                let qfDone = true;
+                                for (let i = 0; i < 4; i++) {
+                                    let m = matches[`Match_${100 + i}`] || {};
+                                    let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
+                                    if (!qfWinner && !m.IsOver) {
+                                        qfDone = false;
+                                        break;
+                                    }
+                                }
+                                if (!qfDone) {
+                                    window.location.href = `quater.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                let sfDone = true;
+                                for (let i = 0; i < 2; i++) {
+                                    let m = matches[`Match_${200 + i}`] || {};
+                                    let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
+                                    if (!sfWinner && !m.IsOver) {
+                                        sfDone = false;
+                                        break;
+                                    }
+                                }
+                                if (!sfDone) {
+                                    window.location.href = `semi.html?tour=${tourKey}`;
+                                    return;
+                                }
+
+                                window.location.href = `final.html?tour=${tourKey}`;
                             }
                         });
                     }

@@ -6,7 +6,21 @@
     <title>MatchBuzz: Live Scoreboard</title>
     <style>
         body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 15px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 15px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        
+        :fullscreen .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            padding: 20px 40px !important;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin: 0 !important;
+        }
+
         .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 8px; }
         .top-card h3 { margin: 0 0 3px 0; font-size: 13px; color: #C8E6C9; }
         .top-card h1 { margin: 0; font-size: 20px; }

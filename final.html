@@ -7,9 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; background: #FFF3E0; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; padding-bottom: 30px; }
-        .nav-buttons { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .nav-buttons { display: flex; gap: 20px; align-items: center; margin-bottom: 10px; }
         .back-btn { background: transparent; color: #0D47A1; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; padding: 0; }
-        .extra-nav-btn { background: #0D47A1; color: #FFFFFF; border: none; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .extra-nav-btn { background: transparent; color: #0D47A1; border: 1px solid #000000; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-sm { padding: 6px 28px; }
         .tour-banner { background: linear-gradient(to bottom, #0D47A1, #1A237E); border: 3px solid #FFD700; border-radius: 16px; padding: 25px 30px; text-align: center; margin-bottom: 20px; }
         .tour-badge { color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
         .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
@@ -98,7 +99,7 @@
         navContainer.appendChild(btnBack);
 
         let btnSm = document.createElement('button');
-        btnSm.className = 'extra-nav-btn';
+        btnSm.className = 'extra-nav-btn btn-sm';
         btnSm.innerHTML = 'SM';
         btnSm.onclick = () => window.location.href = `semi.html?tour=${tourKey}`;
         navContainer.appendChild(btnSm);

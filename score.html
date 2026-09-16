@@ -50,10 +50,10 @@
         
         .divider { height: 3px; background: #5C6BC0; margin: 15px 0; }
         
-        .info-layout { display: flex; justify-content: space-between; font-size: 36px; margin-bottom: 5px; }
+        .info-layout { display: flex; justify-content: space-between; font-size: 36px; margin-bottom: 15px; }
         .bowler-info { text-align: right; color: #FFEB3B; }
         
-        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 34px; font-weight: bold; margin-bottom: 15px; display: none; white-space: pre-line; }
+        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 34px; font-weight: bold; margin-bottom: 5px; display: none; white-space: pre-line; }
         
         .button-row { display: flex; gap: 10px; margin-top: 0; }
         .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
@@ -88,8 +88,6 @@
             </div>
         </div>
 
-        <div class="requirement-bar" id="reqBar"></div>
-
         <div class="over-balls-row">
             <div class="over-label">This Over:</div>
             <div class="balls-container" id="ballsContainer"></div>
@@ -101,6 +99,8 @@
             <div id="battersInfo">• Batter 1 - 0(0)<br>• Batter 2 - 0(0)</div>
             <div class="bowler-info" id="bowlerInfo">Bowler:<br>Bowler Name (0.0-0)</div>
         </div>
+
+        <div class="requirement-bar" id="reqBar"></div>
     </div>
 
     <div class="button-row">

@@ -117,21 +117,8 @@
 
     const backLiveBtn = document.getElementById('backLiveBtn');
     backLiveBtn.onclick = () => {
-        let mIdx = parseInt(matchIndex) || 0;
-        let targetPage = 'round16.html';
-
-        if (mIdx >= 300) {
-            targetPage = 'final.html';
-        } else if (mIdx >= 200) {
-            targetPage = 'semi.html';
-        } else if (mIdx >= 100) {
-            targetPage = 'quater.html';
-        } else {
-            targetPage = 'round16.html';
-        }
-
-        if (tourKey) {
-            window.location.href = `${targetPage}?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + encodeURIComponent(stageName) : ''}`;
+        if (tourKey && matchIndex !== null) {
+            window.location.href = `scoreboard.html?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + encodeURIComponent(stageName) : ''}`;
         } else {
             window.history.back();
         }

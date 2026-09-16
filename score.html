@@ -104,7 +104,7 @@
     </div>
 
     <div class="button-row">
-        <button class="action-btn btn-scorecard" onclick="alert('Full Scorecard view coming up!')">Scorecard</button>
+        <button class="action-btn btn-scorecard" id="scorecardBtn">Scorecard</button>
         <button class="action-btn btn-fullscreen" id="fullscreenBtn">Full screen mode</button>
         <button class="action-btn btn-back" id="backBtn">Back to tournament</button>
     </div>
@@ -137,6 +137,15 @@
         document.getElementById('stageTitle').innerText = `★ ${stageName.toUpperCase()} ★`;
     } else if (singleId) {
         document.getElementById('stageTitle').innerText = `★ SINGLE MATCH ★`;
+    }
+
+    const scorecardBtn = document.getElementById('scorecardBtn');
+    if (singleId) {
+        scorecardBtn.style.display = 'none';
+    } else {
+        scorecardBtn.onclick = () => {
+            window.location.href = `scorecard.html?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + encodeURIComponent(stageName) : ''}`;
+        };
     }
 
     const backBtn = document.getElementById('backBtn');

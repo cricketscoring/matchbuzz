@@ -209,6 +209,8 @@
 
                 let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
                 updateScoreboardUI(matchData, data);
+            } else {
+                updateScoreboardUI({}, data);
             }
         });
     }
@@ -225,6 +227,9 @@
             matchData.I1Ended = false;
             matchData.Innings = 1;
             matchData.Target = 0;
+            matchData.OverBalls = "";
+            matchData.BatsmanStats = {};
+            matchData.BowlerStats = {};
         }
 
         let defaultT1 = "Team A";
@@ -331,7 +336,7 @@
         if (overBallsStr) {
             let ballArray = overBallsStr.split(',');
             ballArray.forEach(ball => {
-                if (ball) {
+                if (ball.trim()) {
                     let span = document.createElement('span');
                     span.className = 'ball-circle';
                     span.innerText = ball;

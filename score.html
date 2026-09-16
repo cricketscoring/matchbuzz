@@ -216,21 +216,13 @@
     }
 
     function updateScoreboardUI(matchData, tourData) {
-        let runs = matchData.Runs || matchData.runs || 0;
-        let wickets = matchData.Wickets || matchData.wickets || 0;
-        let balls = matchData.Balls || matchData.balls || 0;
-        let overs = matchData.Overs || matchData.overs || 0;
+        let runs = matchData.Runs || 0;
+        let wickets = matchData.Wickets || 0;
+        let balls = matchData.Balls || 0;
+        let overs = matchData.Overs !== undefined ? matchData.Overs : 0;
         let maxOvers = matchData.OversLimit || matchData.oversLimit || "20";
-        let innings = matchData.Innings || matchData.innings || 1;
-        let target = matchData.Target || matchData.target || 0;
-
-        if (runs === 0 && wickets === 0 && overs === 0 && balls === 0 && innings === 1 && target === 0) {
-            matchData.IsOver = false;
-            matchData.I1Ended = false;
-            matchData.OverBalls = "";
-            matchData.BatsmanStats = {};
-            matchData.BowlerStats = {};
-        }
+        let innings = matchData.Innings || 1;
+        let target = matchData.Target || 0;
 
         let defaultT1 = "Team A";
         let defaultT2 = "Team B";
@@ -247,10 +239,9 @@
             }
         }
 
-        let team1 = matchData.Team1 || matchData.team1 || defaultT1;
-        let team2 = matchData.Team2 || matchData.team2 || defaultT2;
-        let batTeam = matchData.BatTeam || matchData.batTeam || team1;
-
+        let team1 = matchData.Team1 || defaultT1;
+        let team2 = matchData.Team2 || defaultT2;
+        let batTeam = matchData.BatTeam || team1;
         let bowlTeam = batTeam === team1 ? team2 : team1;
 
         document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
@@ -263,9 +254,9 @@
         let crr = totalOversDecimal > 0 ? (runs / totalOversDecimal) : 0.0;
         document.getElementById('crrVal').innerText = `CRR: ${crr.toFixed(2)}`;
 
-        let isOver = matchData.IsOver || matchData.isOver || matchData.is_game_over || false;
-        let i1Ended = matchData.I1Ended || matchData.i1Ended || matchData.isFirstInningsEnded || false;
-        let resultMsg = matchData.ResultMsg || matchData.resultMsg || matchData.Winner || matchData.winner || "";
+        let isOver = matchData.IsOver || false;
+        let i1Ended = matchData.I1Ended || false;
+        let resultMsg = matchData.ResultMsg || matchData.Winner || "";
 
         let reqBar = document.getElementById('reqBar');
         let targetBar = document.getElementById('targetBar');
@@ -288,7 +279,7 @@
             targetBar.innerText = `Target: ${currentTarget}`;
             reqBar.style.display = 'block';
             reqBar.innerText = `★ INNINGS BREAK ★\nTarget: ${currentTarget} Runs`;
-        } else if (innings >= 2 || (innings === 2 && !i1Ended)) {
+        } else if (innings >= 2) {
             let currentTarget = target > 0 ? target : 0;
             let ballsRemaining = totalBallsAllowed - ballsBowled;
             if (ballsRemaining < 0) ballsRemaining = 0;
@@ -304,31 +295,31 @@
             reqBar.style.display = 'none';
         }
 
-        let striker = matchData.Striker || matchData.striker || "Batter 1";
-        let nonStriker = matchData.NonStriker || matchData.nonStriker || "Batter 2";
-        let isS1Striker = matchData.IsStrikerS1 !== false && matchData.isStrikerS1 !== false;
-        let bowler = matchData.Bowler || matchData.bowler || "Bowler Name";
+        let striker = matchData.Striker || "Batter 1";
+        let nonStriker = matchData.NonStriker || "Batter 2";
+        let isS1Striker = matchData.IsStrikerS1 !== false;
+        let bowler = matchData.Bowler || "Bowler Name";
 
-        let batStats = matchData.BatsmanStats || matchData.batsmanStats || {};
-        let s1Runs = batStats[striker] ? (batStats[striker].Runs || batStats[striker].runs || 0) : 0;
-        let s1Balls = batStats[striker] ? (batStats[striker].Balls || batStats[striker].balls || 0) : 0;
-        let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || batStats[nonStriker].runs || 0) : 0;
-        let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || batStats[nonStriker].balls || 0) : 0;
+        let batStats = matchData.BatsmanStats || {};
+        let s1Runs = batStats[striker] ? (batStats[striker].Runs || 0) : 0;
+        let s1Balls = batStats[striker] ? (batStats[striker].Balls || 0) : 0;
+        let s2Runs = batStats[nonStriker] ? (batStats[nonStriker].Runs || 0) : 0;
+        let s2Balls = batStats[nonStriker] ? (batStats[nonStriker].Balls || 0) : 0;
 
         let p1Line = `• ${striker}${isS1Striker ? '*' : ''} - ${s1Runs}(${s1Balls})`;
         let p2Line = `• ${nonStriker}${!isS1Striker ? '*' : ''} - ${s2Runs}(${s2Balls})`;
         document.getElementById('battersInfo').innerHTML = `${p1Line}<br>${p2Line}`;
 
-        let bowlStats = matchData.BowlerStats || matchData.bowlerStats || {};
+        let bowlStats = matchData.BowlerStats || {};
         let bObj = bowlStats[bowler] || {};
-        let bRuns = bObj.Runs || bObj.runs || 0;
-        let bWickets = bObj.Wickets || bObj.wickets || 0;
-        let bBallsCount = bObj.Balls || bObj.balls || 0;
+        let bRuns = bObj.Runs || 0;
+        let bWickets = bObj.Wickets || 0;
+        let bBallsCount = bObj.Balls || 0;
         let bOv = Math.floor(bBallsCount / 6);
         let bBl = bBallsCount % 6;
         document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
 
-        let overBallsStr = matchData.OverBalls || matchData.overBalls || "";
+        let overBallsStr = matchData.OverBalls || "";
         let ballsContainer = document.getElementById('ballsContainer');
         ballsContainer.innerHTML = '';
         if (overBallsStr) {

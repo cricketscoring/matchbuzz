@@ -20,15 +20,17 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: stretch;
+            gap: 15px;
             margin: 0 !important;
         }
 
-        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 8px; }
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 0; }
         .top-card h3 { margin: 0 0 3px 0; font-size: 20px; color: #C8E6C9; }
         .top-card h1 { margin: 0; font-size: 30px; }
         
-        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px 25px; color: #FFFFFF; margin-bottom: 10px; }
+        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px 25px; color: #FFFFFF; margin-bottom: 0; }
         .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 40px; font-weight: bold; }
         .batting-team { color: #FFCC80; }
         .bowling-team { color: #C5CAE9; }
@@ -48,12 +50,12 @@
         
         .divider { height: 3px; background: #5C6BC0; margin: 15px 0; }
         
-        .info-layout { display: flex; justify-content: space-between; font-size: 32px; margin-bottom: 5px; }
+        .info-layout { display: flex; justify-content: space-between; font-size: 36px; margin-bottom: 5px; }
         .bowler-info { text-align: right; color: #FFEB3B; }
         
         .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 34px; font-weight: bold; margin-bottom: 15px; display: none; white-space: pre-line; }
         
-        .button-row { display: flex; gap: 10px; margin-top: 8px; }
+        .button-row { display: flex; gap: 10px; margin-top: 0; }
         .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
         .btn-scorecard { background: #0F172A; }
         .btn-fullscreen { background: #1E293B; }

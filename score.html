@@ -202,6 +202,7 @@
         document.getElementById('scStageTitle').innerText = `★ ${stageName.toUpperCase()} ★`;
     } else if (singleId) {
         document.getElementById('stageTitle').innerText = `★ SINGLE MATCH ★`;
+        document.getElementById('scStageTitle').innerText = `★ SINGLE MATCH ★`;
     }
 
     let globalMatchData = null;
@@ -212,25 +213,21 @@
     const scorecardBtn = document.getElementById('scorecardBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
 
-    if (singleId) {
-        scorecardBtn.style.display = 'none';
-    } else {
-        scorecardBtn.onclick = () => {
-            modal.style.display = 'block';
-            if (globalMatchData) {
-                selectedModalInnings = globalMatchData.Innings || 1;
-                renderModalScorecard();
-            }
-        };
-        closeModalBtn.onclick = () => {
+    scorecardBtn.onclick = () => {
+        modal.style.display = 'block';
+        if (globalMatchData) {
+            selectedModalInnings = globalMatchData.Innings || 1;
+            renderModalScorecard();
+        }
+    };
+    closeModalBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+    window.onclick = (event) => {
+        if (event.target === modal) {
             modal.style.display = 'none';
-        };
-        window.onclick = (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
-    }
+        }
+    };
 
     window.switchModalInnings = function(inn) {
         selectedModalInnings = inn;
@@ -295,8 +292,14 @@
                 let mName = matchData.match_name || 'SINGLE MATCH';
                 let mId = matchData.match_id || singleId;
                 document.getElementById('tourName').innerText = `${mName.toUpperCase()} (${mId})`;
+                document.getElementById('scTourName').innerText = `${mName.toUpperCase()} (${mId})`;
 
+                globalMatchData = matchData;
                 updateScoreboardUI(matchData, null);
+
+                if (modal.style.display === 'block') {
+                    renderModalScorecard();
+                }
             }
         });
     } else if (tourKey && matchIndex !== null) {

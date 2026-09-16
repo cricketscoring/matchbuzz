@@ -7,7 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; background: #FFF3E0; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: auto; padding-bottom: 30px; }
-        .back-btn { background: transparent; color: #E65100; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; margin-bottom: 10px; }
+        .nav-buttons { display: flex; gap: 20px; align-items: center; margin-bottom: 10px; grid-column: 1 / -1; }
+        .back-btn { background: transparent; color: #E65100; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; padding: 0; }
+        .extra-nav-btn { background: transparent; color: #E65100; border: 1px solid #000000; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-qtr { padding: 6px 28px; }
         .tour-banner { background: #E65100; border: 3px solid #FFB300; border-radius: 16px; padding: 25px 30px; text-align: center; margin-bottom: 20px; grid-column: 1 / -1; }
         .tour-badge { color: #FFE082; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
         .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
@@ -67,11 +70,28 @@
             if (data.SemiFinal_Winner_1) sfWinners[1] = data.SemiFinal_Winner_1;
         }
 
+        let navContainer = document.createElement('div');
+        navContainer.className = 'nav-buttons';
+
         let btnBack = document.createElement('button');
         btnBack.className = 'back-btn';
         btnBack.innerHTML = '← Back';
         btnBack.onclick = () => window.location.href = `quarter.html?tour=${tourKey}`;
-        container.appendChild(btnBack);
+        navContainer.appendChild(btnBack);
+
+        let btnQtr = document.createElement('button');
+        btnQtr.className = 'extra-nav-btn btn-qtr';
+        btnQtr.innerHTML = 'QTR';
+        btnQtr.onclick = () => window.location.href = `quarter.html?tour=${tourKey}`;
+        navContainer.appendChild(btnQtr);
+
+        let btnLive = document.createElement('button');
+        btnLive.className = 'extra-nav-btn';
+        btnLive.innerHTML = 'Live matches';
+        btnLive.onclick = () => window.location.href = 'index.html';
+        navContainer.appendChild(btnLive);
+
+        container.appendChild(navContainer);
 
         let tourBanner = document.createElement('div');
         tourBanner.className = 'tour-banner';

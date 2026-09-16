@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>MatchBuzz: Live Scoreboard</title>
     <style>
         body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
@@ -193,7 +196,7 @@
                 let mId = matchData.match_id || singleId;
                 document.getElementById('tourName').innerText = `${mName.toUpperCase()} (${mId})`;
 
-                updateScoreboardUI(matchData);
+                updateScoreboardUI(matchData, null);
             }
         });
     } else if (tourKey && matchIndex !== null) {
@@ -205,20 +208,44 @@
                 document.getElementById('tourName').innerText = tName.toUpperCase();
 
                 let matchData = data.Matches && data.Matches[`Match_${matchIndex}`] ? data.Matches[`Match_${matchIndex}`] : {};
-                updateScoreboardUI(matchData);
+                updateScoreboardUI(matchData, data);
             }
         });
     }
 
-    function updateScoreboardUI(matchData) {
+    function updateScoreboardUI(matchData, tourData) {
         let runs = matchData.Runs || matchData.runs || 0;
         let wickets = matchData.Wickets || matchData.wickets || 0;
         let balls = matchData.Balls || matchData.balls || 0;
         let overs = matchData.Overs || matchData.overs || 0;
         let maxOvers = matchData.OversLimit || matchData.oversLimit || "20";
-        let batTeam = matchData.BatTeam || matchData.batTeam || matchData.team1 || "Team A";
-        let team1 = matchData.Team1 || matchData.team1 || "Team A";
-        let team2 = matchData.Team2 || matchData.team2 || "Team B";
+
+        if (runs === 0 && wickets === 0 && overs === 0 && balls === 0) {
+            matchData.IsOver = false;
+            matchData.I1Ended = false;
+            matchData.Innings = 1;
+            matchData.Target = 0;
+        }
+
+        let defaultT1 = "Team A";
+        let defaultT2 = "Team B";
+        let mIdx = parseInt(matchIndex) || 0;
+
+        if (tourData) {
+            if (mIdx >= 300) {
+                defaultT1 = tourData.SemiFinal_Winner_0 || "Team A";
+                defaultT2 = tourData.SemiFinal_Winner_1 || "Team B";
+            } else if (mIdx >= 200) {
+                let sfIndex = mIdx - 200;
+                defaultT1 = tourData[`QuarterFinal_Winner_${sfIndex * 2}`] || "Team A";
+                defaultT2 = tourData[`QuarterFinal_Winner_${sfIndex * 2 + 1}`] || "Team B";
+            }
+        }
+
+        let team1 = matchData.Team1 || matchData.team1 || defaultT1;
+        let team2 = matchData.Team2 || matchData.team2 || defaultT2;
+        let batTeam = matchData.BatTeam || matchData.batTeam || team1;
+
         let bowlTeam = batTeam === team1 ? team2 : team1;
 
         document.getElementById('batTeamName').innerText = batTeam.toUpperCase();
@@ -244,7 +271,10 @@
         let totalBallsAllowed = maxOvInt * 6;
         let ballsBowled = (overs * 6) + balls;
 
-        if (isOver) {
+        if (runs === 0 && wickets === 0 && overs === 0 && balls === 0) {
+            targetBar.style.display = 'none';
+            reqBar.style.display = 'none';
+        } else if (isOver) {
             targetBar.style.display = 'block';
             targetBar.innerText = `Target: ${target}`;
             reqBar.style.display = 'block';
@@ -308,7 +338,7 @@
                     if (ball.includes('W') || ball.includes('RO')) span.style.background = '#B91C1C';
                     else if (ball.includes('4')) span.style.background = '#1D4ED8';
                     else if (ball.includes('6')) span.style.background = '#7E22CE';
-                    else if (ball.includes('wd') || matchData.overBalls.includes('nb')) span.style.background = '#C2410C';
+                    else if (ball.includes('wd') || ball.includes('nb')) span.style.background = '#C2410C';
                     else span.style.background = '#334155';
                     ballsContainer.appendChild(span);
                 }

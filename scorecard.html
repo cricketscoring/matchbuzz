@@ -118,7 +118,7 @@
     const backLiveBtn = document.getElementById('backLiveBtn');
     backLiveBtn.onclick = () => {
         if (tourKey && matchIndex !== null) {
-            window.location.href = `scoreboard.html?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + encodeURIComponent(stageName) : ''}`;
+            window.location.href = `score.html?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + encodeURIComponent(stageName) : ''}`;
         } else {
             window.history.back();
         }

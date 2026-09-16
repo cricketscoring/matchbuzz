@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>MatchBuzz: Full Scorecard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 15px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 15px; }
+        .top-card h3 { margin: 0 0 3px 0; font-size: 18px; color: #C8E6C9; }
+        .top-card h1 { margin: 0 0 4px 0; font-size: 24px; }
+        .top-card p { margin: 0; font-size: 14px; color: #E8EAF6; font-weight: bold; }
+
+        .tab-layout { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .tab-active { background: #00695C; }
+        .tab-inactive { background: #B0BEC5; }
+
+        .score-summary { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 15px; }
+        .bat-team-title { color: #FFCC80; font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+        .main-score { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .match-result-text { color: #FFECB3; font-size: 15px; font-weight: bold; }
+
+        .section-title { color: #1A237E; font-size: 18px; font-weight: bold; margin: 15px 0 8px 0; }
+        
+        .table-card { background: #FFFFFF; border-radius: 12px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .table-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E2E8F0; font-size: 16px; color: #333333; }
+        .table-header { font-weight: bold; color: #3F51B5; border-bottom: 2px solid #CBD5E1; }
+        
+        .col-name { flex: 2; text-align: left; }
+        .col-val { flex: 0.8; text-align: center; }
+        .col-val-end { flex: 0.8; text-align: right; }
+
+        .back-btn { display: block; width: 100%; padding: 14px; background: #2E7D32; color: #FFFFFF; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-card">
+        <h3 id="stageTitle">★ MATCH SCORECARD ★</h3>
+        <h1 id="tourName">LOADING...</h1>
+        <p id="matchTeams">TEAM A vs TEAM B</p>
+    </div>
+
+    <div class="tab-layout">
+        <button class="tab-btn tab-active" id="btnTab1" onclick="switchInnings(1)">1ST INNINGS</button>
+        <button class="tab-btn tab-inactive" id="btnTab2" onclick="switchInnings(2)">2ND INNINGS</button>
+    </div>
+
+    <div class="score-summary">
+        <div class="bat-team-title" id="summaryBatTeam">BATTING TEAM</div>
+        <div class="main-score" id="summaryScore">0/0 (0.0 Ov)</div>
+        <div class="match-result-text" id="summaryMessage"></div>
+    </div>
+
+    <div class="section-title">Batting Scorecard</div>
+    <div class="table-card" id="battingTableContainer">
+        <div class="table-row table-header">
+            <div class="col-name">Batsman</div>
+            <div class="col-val">R</div>
+            <div class="col-val">B</div>
+            <div class="col-val">4s</div>
+            <div class="col-val">6s</div>
+        </div>
+        <div id="battingRows"></div>
+    </div>
+
+    <div class="section-title">Bowling Scorecard</div>
+    <div class="table-card" id="bowlingTableContainer">
+        <div class="table-row table-header">
+            <div class="col-name">Bowler</div>
+            <div class="col-val">O</div>
+            <div class="col-val">R</div>
+            <div class="col-val-end">W</div>
+        </div>
+        <div id="bowlingRows"></div>
+    </div>
+
+    <button class="back-btn" id="backLiveBtn">BACK TO LIVE MATCH</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour');
+    const matchIndex = urlParams.get('match');
+    const stageName = urlParams.get('stage');
+
+    if (stageName) {
+        document.getElementById('stageTitle').innerText = `★ ${stageName.toUpperCase()} SCORECARD ★`;
+    }
+
+    let globalMatchData = null;
+    let globalTourData = null;
+    let selectedInnings = 1;
+
+    const backLiveBtn = document.getElementById('backLiveBtn');
+    backLiveBtn.onclick = () => {
+        window.location.href = `scoreboard.html?tour=${tourKey}&match=${matchIndex}${stageName ? '&stage=' + stageName : ''}`;
+    };
+
+    if (tourKey && matchIndex !== null) {
+        const tourRef = ref(db, `Tournaments/${tourKey}`);
+        onValue(tourRef, (snapshot) => {
+            if (snapshot.exists()) {
+                globalTourData = snapshot.val();
+                let tName = globalTourData.T_Name || tourKey;
+                document.getElementById('tourName').innerText = tName.toUpperCase();
+
+                globalMatchData = globalTourData.Matches && globalTourData.Matches[`Match_${matchIndex}`] ? globalTourData.Matches[`Match_${matchIndex}`] : {};
+                
+                selectedInnings = globalMatchData.Innings || 1;
+                renderScorecard();
+            }
+        });
+    }
+
+    window.switchInnings = function(inn) {
+        selectedInnings = inn;
+        renderScorecard();
+    };
+
+    function renderScorecard() {
+        if (!globalMatchData) return;
+
+        let mData = globalMatchData;
+        let tourData = globalTourData;
+
+        let defaultT1 = "Team A";
+        let defaultT2 = "Team B";
+        let mIdx = parseInt(matchIndex) || 0;
+
+        if (tourData) {
+            if (mIdx >= 300) {
+                defaultT1 = tourData.SemiFinal_Winner_0 || "Team A";
+                defaultT2 = tourData.SemiFinal_Winner_1 || "Team B";
+            } else if (mIdx >= 200) {
+                let sfIndex = mIdx - 200;
+                defaultT1 = tourData[`QuarterFinal_Winner_${sfIndex * 2}`] || "Team A";
+                defaultT2 = tourData[`QuarterFinal_Winner_${sfIndex * 2 + 1}`] || "Team B";
+            }
+        }
+
+        let team1 = mData.Team1 || defaultT1;
+        let team2 = mData.Team2 || defaultT2;
+        document.getElementById('matchTeams').innerText = `${team1.toUpperCase()} vs ${team2.toUpperCase()}`;
+
+        let currentActiveInnings = selectedInnings;
+        let btn1 = document.getElementById('btnTab1');
+        let btn2 = document.getElementById('btnTab2');
+
+        if (currentActiveInnings === 1) {
+            btn1.className = "tab-btn tab-active";
+            btn2.className = "tab-btn tab-inactive";
+        } else {
+            btn1.className = "tab-btn tab-inactive";
+            btn2.className = "tab-btn tab-active";
+        }
+
+        let batTeam, runs, wickets, overs, balls, maxOvers, batStats, bowlStats;
+        let maxOv = mData.OversLimit || mData.oversLimit || "20";
+
+        if (currentActiveInnings === 1) {
+            batTeam = mData.I1_BatTeam || mData.BatTeam || team1;
+            runs = mData.I1_Runs !== undefined ? mData.I1_Runs : (mData.Innings === 1 ? (mData.Runs || 0) : 0);
+            wickets = mData.I1_Wickets !== undefined ? mData.I1_Wickets : (mData.Innings === 1 ? (mData.Wickets || 0) : 0);
+            overs = mData.I1_Overs !== undefined ? mData.I1_Overs : (mData.Innings === 1 ? (mData.Overs || 0) : 0);
+            balls = mData.I1_Balls !== undefined ? mData.I1_Balls : (mData.Innings === 1 ? (mData.Balls || 0) : 0);
+            batStats = mData.I1_BatsmanStats || (mData.Innings === 1 ? (mData.BatsmanStats || {}) : {});
+            bowlStats = mData.I1_BowlerStats || (mData.Innings === 1 ? (mData.BowlerStats || {}) : {});
+        } else {
+            batTeam = mData.BatTeam || team2;
+            runs = mData.Runs || 0;
+            wickets = mData.Wickets || 0;
+            overs = mData.Overs || 0;
+            balls = mData.Balls || 0;
+            batStats = mData.BatsmanStats || {};
+            bowlStats = mData.BowlerStats || {};
+        }
+
+        document.getElementById('summaryBatTeam').innerText = batTeam.toUpperCase();
+        document.getElementById('summaryScore').innerText = `${runs}/${wickets}  (${overs}.${balls} / ${maxOv} Ov)`;
+
+        let isOver = mData.IsOver || false;
+        let resultMsg = mData.ResultMsg || mData.Winner || "";
+        let target = mData.Target || 0;
+
+        let summaryMsgEl = document.getElementById('summaryMessage');
+        if (isOver) {
+            summaryMsgEl.innerText = resultMsg;
+        } else if (target > 0 && currentActiveInnings === 2) {
+            let maxOvInt = parseInt(maxOv) || 20;
+            let totalBallsAllowed = maxOvInt * 6;
+            let ballsBowled = (overs * 6) + balls;
+            let ballsRemaining = totalBallsAllowed - ballsBowled;
+            if (ballsRemaining < 0) ballsRemaining = 0;
+            let runsNeeded = target - runs;
+            if (runsNeeded < 0) runsNeeded = 0;
+
+            summaryMsgEl.innerText = `Need ${runsNeeded} runs in ${ballsRemaining} balls (Target: ${target})`;
+        } else if (currentActiveInnings === 1 && mData.I1Ended) {
+            summaryMsgEl.innerText = `★ INNINGS BREAK ★ Target: ${runs + 1} Runs`;
+        } else {
+            summaryMsgEl.innerText = "";
+        }
+
+        let batRowsContainer = document.getElementById('battingRows');
+        batRowsContainer.innerHTML = '';
+        if (batStats && Object.keys(batStats).length > 0) {
+            for (let [name, st] of Object.entries(batStats)) {
+                let r = st.Runs || st.runs || 0;
+                let b = st.Balls || st.balls || 0;
+                let fours = st.Fours || st.fours || 0;
+                let sixes = st.Sixes || st.sixes || 0;
+
+                let row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div class="col-name">${name}</div>
+                    <div class="col-val">${r}</div>
+                    <div class="col-val">${b}</div>
+                    <div class="col-val">${fours}</div>
+                    <div class="col-val">${sixes}</div>
+                `;
+                batRowsContainer.appendChild(row);
+            }
+        } else {
+            batRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575;">No batting records available.</div>';
+        }
+
+        let bowlRowsContainer = document.getElementById('bowlingRows');
+        bowlRowsContainer.innerHTML = '';
+        if (bowlStats && Object.keys(bowlStats).length > 0) {
+            for (let [name, st] of Object.entries(bowlStats)) {
+                let bRuns = st.Runs || st.runs || 0;
+                let bWickets = st.Wickets || st.wickets || 0;
+                let bBalls = st.Balls || st.balls || 0;
+                let bOvers = Math.floor(bBalls / 6);
+                let bRemBalls = bBalls % 6;
+
+                let row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div class="col-name">${name}</div>
+                    <div class="col-val">${bOvers}.${bRemBalls}</div>
+                    <div class="col-val">${bRuns}</div>
+                    <div class="col-val-end">${bWickets}</div>
+                `;
+                bowlRowsContainer.appendChild(row);
+            }
+        } else {
+            bowlRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575;">No bowling records available.</div>';
+        }
+    }
+</script>
+
+</body>
+</html>

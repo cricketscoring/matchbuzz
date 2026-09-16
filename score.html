@@ -61,19 +61,24 @@
         .btn-fullscreen { background: #1E293B; }
         .btn-back { background: #047857; }
 
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: #F4F6F9; border-radius: 16px; max-width: 900px; margin: auto; padding: 20px; position: relative; box-sizing: border-box; }
-        .close-modal-btn { background: #B91C1C; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 15px; float: right; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow-y: auto; padding: 10px; box-sizing: border-box; }
+        .modal-content { background: #F4F6F9; border-radius: 16px; width: 98%; max-width: none; margin: 10px auto; padding: 20px; position: relative; box-sizing: border-box; }
+        .close-modal-btn { background: #B91C1C; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 15px; float: right; }
         
-        .sc-top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 15px; clear: both; }
+        .sc-top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 18px; text-align: center; color: #FFFFFF; margin-bottom: 15px; clear: both; }
+        .sc-top-card h3 { font-size: 28px !important; margin: 0 0 5px 0; color: #C8E6C9; }
+        .sc-top-card h1 { font-size: 40px !important; margin: 0 0 5px 0; }
+        .sc-top-card p { font-size: 24px !important; margin: 0; color: #E8EAF6; font-weight: bold; }
+
         .sc-tab-layout { display: flex; gap: 10px; margin-bottom: 15px; }
-        .sc-tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .sc-tab-btn { flex: 1; padding: 14px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
         .sc-tab-active { background: #00695C; }
         .sc-tab-inactive { background: #B0BEC5; }
-        .sc-score-summary { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 15px; color: #FFFFFF; margin-bottom: 15px; }
-        .sc-table-card { background: #FFFFFF; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .sc-table-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E2E8F0; font-size: 16px; color: #333333; }
-        .sc-table-header { font-weight: bold; color: #3F51B5; border-bottom: 2px solid #CBD5E1; }
+
+        .sc-score-summary { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 15px; }
+        .sc-table-card { background: #FFFFFF; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .sc-table-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #E2E8F0; font-size: 28px; color: #333333; }
+        .sc-table-header { font-weight: bold; color: #3F51B5; border-bottom: 3px solid #CBD5E1; font-size: 30px !important; }
     </style>
 </head>
 <body>
@@ -129,8 +134,8 @@
         <button class="close-modal-btn" id="closeModalBtn">Close Scorecard</button>
         <div class="sc-top-card">
             <h3 id="scStageTitle">★ MATCH SCORECARD ★</h3>
-            <h1 id="scTourName" style="font-size: 22px; margin: 2px 0;">LOADING...</h1>
-            <p id="scMatchTeams" style="margin: 0; font-size: 14px; color: #E8EAF6; font-weight: bold;">TEAM A vs TEAM B</p>
+            <h1 id="scTourName">LOADING...</h1>
+            <p id="scMatchTeams">TEAM A vs TEAM B</p>
         </div>
 
         <div class="sc-tab-layout">
@@ -139,12 +144,12 @@
         </div>
 
         <div class="sc-score-summary">
-            <div id="scSummaryBatTeam" style="color: #FFCC80; font-size: 18px; font-weight: bold; margin-bottom: 4px;">BATTING TEAM</div>
-            <div id="scSummaryScore" style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">0/0 (0.0 Ov)</div>
-            <div id="scSummaryMessage" style="color: #FFECB3; font-size: 14px; font-weight: bold;"></div>
+            <div id="scSummaryBatTeam" style="color: #FFCC80; font-size: 32px; font-weight: bold; margin-bottom: 8px;">BATTING TEAM</div>
+            <div id="scSummaryScore" style="font-size: 45px; font-weight: bold; margin-bottom: 8px;">0/0 (0.0 Ov)</div>
+            <div id="scSummaryMessage" style="color: #FFECB3; font-size: 26px; font-weight: bold;"></div>
         </div>
 
-        <div style="color: #1A237E; font-size: 16px; font-weight: bold; margin-bottom: 6px;">Batting Scorecard</div>
+        <div style="color: #1A237E; font-size: 32px; font-weight: bold; margin-bottom: 10px;">Batting Scorecard</div>
         <div class="sc-table-card">
             <div class="sc-table-row sc-table-header">
                 <div style="flex: 2; text-align: left;">Batsman</div>
@@ -156,7 +161,7 @@
             <div id="scBattingRows"></div>
         </div>
 
-        <div style="color: #1A237E; font-size: 16px; font-weight: bold; margin-bottom: 6px;">Bowling Scorecard</div>
+        <div style="color: #1A237E; font-size: 32px; font-weight: bold; margin-bottom: 10px;">Bowling Scorecard</div>
         <div class="sc-table-card">
             <div class="sc-table-row sc-table-header">
                 <div style="flex: 2; text-align: left;">Bowler</div>
@@ -547,7 +552,7 @@
                 batRowsContainer.appendChild(row);
             }
         } else {
-            batRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575;">No batting records available.</div>';
+            batRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575; font-size: 24px;">No batting records available.</div>';
         }
 
         let bowlRowsContainer = document.getElementById('scBowlingRows');
@@ -571,7 +576,7 @@
                 bowlRowsContainer.appendChild(row);
             }
         } else {
-            bowlRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575;">No bowling records available.</div>';
+            bowlRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575; font-size: 24px;">No bowling records available.</div>';
         }
     }
 </script>

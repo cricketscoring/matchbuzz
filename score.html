@@ -265,7 +265,7 @@
         let totalBallsAllowed = maxOvInt * 6;
         let ballsBowled = (overs * 6) + balls;
 
-        if (runs === 0 && wickets === 0 && overs === 0 && balls === 0 && innings === 1 && target === 0) {
+        if (runs === 0 && wickets === 0 && overs === 0 && balls === 0 && innings === 1 && target === 0 && !i1Ended && !isOver) {
             targetBar.style.display = 'none';
             reqBar.style.display = 'none';
         } else if (isOver) {
@@ -273,7 +273,7 @@
             targetBar.innerText = `Target: ${target}`;
             reqBar.style.display = 'block';
             reqBar.innerText = resultMsg || "Match Over";
-        } else if (i1Ended && innings === 1) {
+        } else if (i1Ended) {
             let currentTarget = target > 0 ? target : (runs + 1);
             targetBar.style.display = 'block';
             targetBar.innerText = `Target: ${currentTarget}`;

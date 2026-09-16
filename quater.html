@@ -7,7 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; background: #E0F2F1; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: auto; padding-bottom: 30px; }
-        .back-btn { background: transparent; color: #00695C; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; margin-bottom: 10px; }
+        .nav-buttons { display: flex; gap: 20px; align-items: center; margin-bottom: 10px; grid-column: 1 / -1; }
+        .back-btn { background: transparent; color: #00695C; border: none; font-size: 26px; font-weight: bold; cursor: pointer; margin-left: -5px; padding: 0; }
+        .extra-nav-btn { background: transparent; color: #00695C; border: 1px solid #000000; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-r16 { padding: 6px 28px; }
         .tour-banner { background: #1A237E; border: 3px solid #3F51B5; border-radius: 16px; padding: 25px 30px; text-align: center; margin-bottom: 20px; grid-column: 1 / -1; }
         .tour-banner h2 { margin: 0; color: #FFFFFF; font-size: 21px; }
         .page-title { text-align: center; color: #00695C; font-size: 22px; font-weight: bold; margin-bottom: 20px; grid-column: 1 / -1; }
@@ -69,11 +72,28 @@
             }
         }
 
+        let navContainer = document.createElement('div');
+        navContainer.className = 'nav-buttons';
+
         let btnBack = document.createElement('button');
         btnBack.className = 'back-btn';
         btnBack.innerHTML = '← Back';
         btnBack.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
-        container.appendChild(btnBack);
+        navContainer.appendChild(btnBack);
+
+        let btnR16 = document.createElement('button');
+        btnR16.className = 'extra-nav-btn btn-r16';
+        btnR16.innerHTML = 'R16';
+        btnR16.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
+        navContainer.appendChild(btnR16);
+
+        let btnLive = document.createElement('button');
+        btnLive.className = 'extra-nav-btn';
+        btnLive.innerHTML = 'Live matches';
+        btnLive.onclick = () => window.location.href = 'index.html';
+        navContainer.appendChild(btnLive);
+
+        container.appendChild(navContainer);
 
         let tourBanner = document.createElement('div');
         tourBanner.className = 'tour-banner';

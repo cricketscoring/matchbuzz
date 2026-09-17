@@ -66,7 +66,8 @@
                 let singles = rootData.MatchBuzz.SingleMatches;
                 Object.keys(singles).forEach(key => {
                     let match = singles[key];
-                    if (!match.is_game_over) {
+                    let isLive = match.isLive === true || match.isLive === "true";
+                    if (isLive) {
                         allItems.push({
                             title: `🏏 ${(match.match_name || 'SINGLE MATCH').toUpperCase()} (${match.match_id || key})`,
                             sub: `Score: 0/0 | Batting: ${match.team1 || 'Team A'}`,
@@ -84,60 +85,63 @@
                 Object.keys(tournaments).forEach(tourKey => {
                     if (tourKey.startsWith("Tour_")) {
                         let tour = tournaments[tourKey];
-                        let tName = tour.T_Name || tourKey;
-                        let tId = tourKey.replace("Tour_", "");
-                        
-                        allItems.push({
-                            title: `🏆 ${tName.toUpperCase()} (${tId})`,
-                            sub: "Tournament in Progress - Click to continue",
-                            searchKey: `${tName} ${tId}`.toLowerCase(),
-                            action: () => {
-                                let matches = tour.Matches || {};
-                                
-                                let r16Done = true;
-                                for (let i = 0; i < 8; i++) {
-                                    let m = matches[`Match_${i}`] || {};
-                                    if (!m.Winner && !m.IsOver) {
-                                        r16Done = false;
-                                        break;
+                        let isLive = tour.isLive === true || tour.isLive === "true";
+                        if (isLive) {
+                            let tName = tour.T_Name || tourKey;
+                            let tId = tourKey.replace("Tour_", "");
+                            
+                            allItems.push({
+                                title: `🏆 ${tName.toUpperCase()} (${tId})`,
+                                sub: "Tournament in Progress - Click to continue",
+                                searchKey: `${tName} ${tId}`.toLowerCase(),
+                                action: () => {
+                                    let matches = tour.Matches || {};
+                                    
+                                    let r16Done = true;
+                                    for (let i = 0; i < 8; i++) {
+                                        let m = matches[`Match_${i}`] || {};
+                                        if (!m.Winner && !m.IsOver) {
+                                            r16Done = false;
+                                            break;
+                                        }
                                     }
-                                }
-                                if (!r16Done) {
-                                    window.location.href = `round16.html?tour=${tourKey}`;
-                                    return;
-                                }
-
-                                let qfDone = true;
-                                for (let i = 0; i < 4; i++) {
-                                    let m = matches[`Match_${100 + i}`] || {};
-                                    let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
-                                    if (!qfWinner && !m.IsOver) {
-                                        qfDone = false;
-                                        break;
+                                    if (!r16Done) {
+                                        window.location.href = `round16.html?tour=${tourKey}`;
+                                        return;
                                     }
-                                }
-                                if (!qfDone) {
-                                    window.location.href = `quater.html?tour=${tourKey}`;
-                                    return;
-                                }
 
-                                let sfDone = true;
-                                for (let i = 0; i < 2; i++) {
-                                    let m = matches[`Match_${200 + i}`] || {};
-                                    let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
-                                    if (!sfWinner && !m.IsOver) {
-                                        sfDone = false;
-                                        break;
+                                    let qfDone = true;
+                                    for (let i = 0; i < 4; i++) {
+                                        let m = matches[`Match_${100 + i}`] || {};
+                                        let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
+                                        if (!qfWinner && !m.IsOver) {
+                                            qfDone = false;
+                                            break;
+                                        }
                                     }
-                                }
-                                if (!sfDone) {
-                                    window.location.href = `semi.html?tour=${tourKey}`;
-                                    return;
-                                }
+                                    if (!qfDone) {
+                                        window.location.href = `quater.html?tour=${tourKey}`;
+                                        return;
+                                    }
 
-                                window.location.href = `final.html?tour=${tourKey}`;
-                            }
-                        });
+                                    let sfDone = true;
+                                    for (let i = 0; i < 2; i++) {
+                                        let m = matches[`Match_${200 + i}`] || {};
+                                        let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
+                                        if (!sfWinner && !m.IsOver) {
+                                            sfDone = false;
+                                            break;
+                                        }
+                                    }
+                                    if (!sfDone) {
+                                        window.location.href = `semi.html?tour=${tourKey}`;
+                                        return;
+                                    }
+
+                                    window.location.href = `final.html?tour=${tourKey}`;
+                                }
+                            });
+                        }
                     }
                 });
             }
@@ -150,7 +154,7 @@
         container.innerHTML = '';
 
         if (list.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px; grid-column: 1 / -1;">No match or tournament found.</div>';
+            container.innerHTML = '<div style="text-align:center; color:#78909C; padding:20px; grid-column: 1 / -1;">No live matches available right now.</div>';
             return;
         }
 

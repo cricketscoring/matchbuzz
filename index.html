@@ -96,49 +96,66 @@
                                 searchKey: `${tName} ${tId}`.toLowerCase(),
                                 action: () => {
                                     let matches = tour.Matches || {};
-                                    
-                                    let r16Done = true;
+                                    let teamsList = tour.T_Teams ? tour.T_Teams.split(",") : [];
+                                    let totalTeamCount = teamsList.length > 0 ? teamsList.length : 16;
+
+                                    let round16AllFinished = true;
                                     for (let i = 0; i < 8; i++) {
                                         let m = matches[`Match_${i}`] || {};
                                         if (!m.Winner && !m.IsOver) {
-                                            r16Done = false;
+                                            round16AllFinished = false;
                                             break;
                                         }
                                     }
-                                    if (!r16Done) {
-                                        window.location.href = `round16.html?tour=${tourKey}`;
-                                        return;
-                                    }
 
-                                    let qfDone = true;
+                                    let quarterAllFinished = true;
                                     for (let i = 0; i < 4; i++) {
                                         let m = matches[`Match_${100 + i}`] || {};
                                         let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
                                         if (!qfWinner && !m.IsOver) {
-                                            qfDone = false;
+                                            quarterAllFinished = false;
                                             break;
                                         }
                                     }
-                                    if (!qfDone) {
-                                        window.location.href = `quater.html?tour=${tourKey}`;
-                                        return;
-                                    }
 
-                                    let sfDone = true;
+                                    let semiAllFinished = true;
                                     for (let i = 0; i < 2; i++) {
                                         let m = matches[`Match_${200 + i}`] || {};
                                         let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
                                         if (!sfWinner && !m.IsOver) {
-                                            sfDone = false;
+                                            semiAllFinished = false;
                                             break;
                                         }
                                     }
-                                    if (!sfDone) {
-                                        window.location.href = `semi.html?tour=${tourKey}`;
-                                        return;
-                                    }
 
-                                    window.location.href = `final.html?tour=${tourKey}`;
+                                    let finalWinner = tour.Final_Winner_0 || matches[`Match_300`]?.Winner || "";
+                                    let finalHasWinner = (finalWinner !== "");
+
+                                    if (totalTeamCount === 4) {
+                                        if (finalHasWinner || semiAllFinished) {
+                                            window.location.href = `final.html?tour=${tourKey}`;
+                                        } else {
+                                            window.location.href = `semi.html?tour=${tourKey}`;
+                                        }
+                                    } else if (totalTeamCount === 8) {
+                                        if (finalHasWinner || semiAllFinished) {
+                                            window.location.href = `final.html?tour=${tourKey}`;
+                                        } else if (quarterAllFinished) {
+                                            window.location.href = `semi.html?tour=${tourKey}`;
+                                        } else {
+                                            window.location.href = `quater.html?tour=${tourKey}`;
+                                        }
+                                    } else {
+                                        if (finalHasWinner || semiAllFinished) {
+                                            window.location.href = `final.html?tour=${tourKey}`;
+                                        } else if (quarterAllFinished) {
+                                            window.location.href = `semi.html?tour=${tourKey}`;
+                                        } else if (round16AllFinished) {
+                                            window.location.href = `quater.html?tour=${tourKey}`;
+                                        } else {
+                                            window.location.href = `round16.html?tour=${tourKey}`;
+                                        }
+                                    }
                                 }
                             });
                         }

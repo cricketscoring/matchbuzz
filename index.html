@@ -96,8 +96,16 @@
                                 searchKey: `${tName} ${tId}`.toLowerCase(),
                                 action: () => {
                                     let matches = tour.Matches || {};
-                                    let teamsList = tour.T_Teams ? tour.T_Teams.split(",") : [];
-                                    let totalTeamCount = teamsList.length > 0 ? teamsList.length : 16;
+                                    
+                                    let totalTeamCount = 16;
+                                    if (tour.T_TeamCount) {
+                                        totalTeamCount = parseInt(tour.T_TeamCount) || 16;
+                                    } else if (tour.T_Teams) {
+                                        let tArr = tour.T_Teams.split(",");
+                                        if (tArr.length > 0 && tArr[0].trim() !== "") {
+                                            totalTeamCount = tArr.length;
+                                        }
+                                    }
 
                                     let round16AllFinished = true;
                                     for (let i = 0; i < 8; i++) {

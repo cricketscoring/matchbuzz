@@ -96,11 +96,10 @@
                                 searchKey: `${tName} ${tId}`.toLowerCase(),
                                 action: () => {
                                     let matches = tour.Matches || {};
-                                    
-                                    let totalTeamCount = 16;
-                                    if (tour.T_TeamCount) {
-                                        totalTeamCount = parseInt(tour.T_TeamCount) || 16;
-                                    } else if (tour.T_Teams) {
+                                    let teamsObj = tour.Teams || {};
+                                    let totalTeamCount = Object.keys(teamsObj).length > 0 ? Object.keys(teamsObj).length : 16;
+
+                                    if (tour.T_Teams) {
                                         let tArr = tour.T_Teams.split(",");
                                         if (tArr.length > 0 && tArr[0].trim() !== "") {
                                             totalTeamCount = tArr.length;
@@ -109,8 +108,8 @@
 
                                     let round16AllFinished = true;
                                     for (let i = 0; i < 8; i++) {
-                                        let m = matches[`Match_${i}`] || {};
-                                        if (!m.Winner && !m.IsOver) {
+                                        let winner = tour[`Round16_Winner_${i}`] || matches[`Match_${i}`]?.Winner || "";
+                                        if (!winner) {
                                             round16AllFinished = false;
                                             break;
                                         }
@@ -118,9 +117,8 @@
 
                                     let quarterAllFinished = true;
                                     for (let i = 0; i < 4; i++) {
-                                        let m = matches[`Match_${100 + i}`] || {};
-                                        let qfWinner = tour[`QuarterFinal_Winner_${i}`] || m.Winner;
-                                        if (!qfWinner && !m.IsOver) {
+                                        let winner = tour[`QuarterFinal_Winner_${i}`] || matches[`Match_${100 + i}`]?.Winner || "";
+                                        if (!winner) {
                                             quarterAllFinished = false;
                                             break;
                                         }
@@ -128,9 +126,8 @@
 
                                     let semiAllFinished = true;
                                     for (let i = 0; i < 2; i++) {
-                                        let m = matches[`Match_${200 + i}`] || {};
-                                        let sfWinner = tour[`SemiFinal_Winner_${i}`] || m.Winner;
-                                        if (!sfWinner && !m.IsOver) {
+                                        let winner = tour[`SemiFinal_Winner_${i}`] || matches[`Match_${200 + i}`]?.Winner || "";
+                                        if (!winner) {
                                             semiAllFinished = false;
                                             break;
                                         }

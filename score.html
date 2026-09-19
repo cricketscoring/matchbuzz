@@ -18,6 +18,7 @@
             align-items: center; 
             min-height: 100vh; 
             box-sizing: border-box;
+            overflow-x: hidden;
         }
         .container { 
             max-width: 850px; 
@@ -63,7 +64,7 @@
         :fullscreen .top-card h1, :-webkit-full-screen .top-card h1 { font-size: 46px !important; }
         :fullscreen .top-card h3, :-webkit-full-screen .top-card h3 { font-size: 24px !important; }
         
-        .score-card { background: linear-gradient(135deg, #1A237E, #3F51B5); border-radius: 16px; padding: 25px; color: #FFFFFF; margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .score-card { background: linear-gradient(135deg, #1A237E, #3F51B5); border-radius: 16px; padding: 25px; color: #FFFFFF; margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
         .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 30px; font-weight: bold; }
         :fullscreen .teams-row, :-webkit-full-screen .teams-row { font-size: 48px !important; margin-bottom: 15px !important; }
         .batting-team { color: #FFCC80; }
@@ -107,6 +108,33 @@
         .btn-fullscreen { background: #1E293B; border: 1px solid #475569; }
         .btn-back { background: #047857; }
 
+        /* Animation Popup Overlay */
+        .anim-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 50px;
+            font-weight: bold;
+            color: #FFD700;
+            z-index: 100;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            pointer-events: none;
+            display: none;
+        }
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        .anim-show {
+            display: block;
+            animation: popIn 1.5s ease-in-out forwards;
+        }
+
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow-y: auto; padding: 10px; box-sizing: border-box; }
         .modal-content { background: #111827; color: white; border-radius: 16px; width: 98%; max-width: 1100px; margin: 20px auto; padding: 25px; position: relative; box-sizing: border-box; }
         .close-modal-btn { background: #B91C1C; color: white; border: none; padding: 12px 22px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 15px; float: right; }
@@ -136,6 +164,7 @@
     </div>
 
     <div class="score-card">
+        <div class="anim-popup" id="animPopup"></div>
         <div class="teams-row">
             <div class="batting-team" id="batTeamName">TEAM A</div>
             <div class="vs-text">VS</div>
@@ -254,6 +283,7 @@
     let globalMatchData = null;
     let globalTourData = null;
     let selectedModalInnings = 1;
+    let lastProcessedBallStr = "";
 
     const modal = document.getElementById('scorecardModal');
     const scorecardBtn = document.getElementById('scorecardBtn');
@@ -371,6 +401,15 @@
         });
     }
 
+    function triggerAnimation(text, color) {
+        let popup = document.getElementById('animPopup');
+        popup.innerText = text;
+        popup.style.color = color;
+        popup.classList.remove('anim-show');
+        void popup.offsetWidth;
+        popup.classList.add('anim-show');
+    }
+
     function updateScoreboardUI(matchData, tourData) {
         let runs = matchData.Runs || 0;
         let wickets = matchData.Wickets || 0;
@@ -413,6 +452,24 @@
         let isOver = matchData.IsOver || false;
         let i1Ended = matchData.I1Ended || false;
         let resultMsg = matchData.ResultMsg || matchData.Winner || "";
+
+        let overBallsStr = matchData.OverBalls || "";
+        if (overBallsStr && overBallsStr !== lastProcessedBallStr) {
+            lastProcessedBallStr = overBallsStr;
+            let ballArray = overBallsStr.split(',');
+            let lastBall = ballArray[ballArray.length - 1].trim();
+            if (lastBall === '4') {
+                triggerAnimation("FOUR!", "#3b82f6");
+            } else if (lastBall === '6') {
+                triggerAnimation("SIX!", "#a855f7");
+            } else if (lastBall.includes('W') || lastBall.includes('RO')) {
+                triggerAnimation("WICKET!", "#ef4444");
+            }
+        }
+
+        if (isOver) {
+            triggerAnimation("VICTORY!", "#10b981");
+        }
 
         let reqBar = document.getElementById('reqBar');
         let targetBar = document.getElementById('targetBar');
@@ -475,7 +532,6 @@
         let bBl = bBallsCount % 6;
         document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
 
-        let overBallsStr = matchData.OverBalls || "";
         let ballsContainer = document.getElementById('ballsContainer');
         ballsContainer.innerHTML = '';
         if (overBallsStr) {

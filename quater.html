@@ -60,11 +60,24 @@
         let tName = "TOURNAMENT";
         let matches = {};
         let qfWinners = {};
+        let totalTeamCount = 16;
 
         if (snapshot.exists()) {
             let data = snapshot.val();
             tName = data.T_Name || tourKey;
             matches = data.Matches || {};
+            
+            if (data.T_TeamCount) {
+                totalTeamCount = parseInt(data.T_TeamCount) || 16;
+            } else if (data.T_Teams) {
+                let tArr = data.T_Teams.split(",");
+                if (tArr.length > 0 && tArr[0].trim() !== "") {
+                    totalTeamCount = tArr.length;
+                }
+            } else if (data.Teams) {
+                totalTeamCount = Object.keys(data.Teams).length || 16;
+            }
+
             for (let k = 0; k < 4; k++) {
                 if (data[`QuarterFinal_Winner_${k}`]) {
                     qfWinners[k] = data[`QuarterFinal_Winner_${k}`];
@@ -75,17 +88,21 @@
         let navContainer = document.createElement('div');
         navContainer.className = 'nav-buttons';
 
+        let backTarget = totalTeamCount === 16 ? `round16.html?tour=${tourKey}` : `index.html`;
+
         let btnBack = document.createElement('button');
         btnBack.className = 'back-btn';
         btnBack.innerHTML = '← Back';
-        btnBack.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
+        btnBack.onclick = () => window.location.href = backTarget;
         navContainer.appendChild(btnBack);
 
-        let btnR16 = document.createElement('button');
-        btnR16.className = 'extra-nav-btn btn-r16';
-        btnR16.innerHTML = 'R16';
-        btnR16.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
-        navContainer.appendChild(btnR16);
+        if (totalTeamCount === 16) {
+            let btnR16 = document.createElement('button');
+            btnR16.className = 'extra-nav-btn btn-r16';
+            btnR16.innerHTML = 'R16';
+            btnR16.onclick = () => window.location.href = `round16.html?tour=${tourKey}`;
+            navContainer.appendChild(btnR16);
+        }
 
         let btnLive = document.createElement('button');
         btnLive.className = 'extra-nav-btn';

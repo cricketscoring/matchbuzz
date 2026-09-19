@@ -254,6 +254,8 @@
     let globalMatchData = null;
     let globalTourData = null;
     let selectedModalInnings = 1;
+    let lastStoredBowler = "";
+    let previousOverBalls = "";
 
     const modal = document.getElementById('scorecardModal');
     const scorecardBtn = document.getElementById('scorecardBtn');
@@ -456,6 +458,24 @@
         let isS1Striker = matchData.IsStrikerS1 !== false;
         let bowler = matchData.Bowler || "Bowler Name";
 
+        if (!lastStoredBowler) {
+            lastStoredBowler = bowler;
+        }
+
+        let overBallsStr = matchData.OverBalls || "";
+        let displayBallsStr = "";
+
+        if (bowler !== lastStoredBowler) {
+            lastStoredBowler = bowler;
+            previousOverBalls = "";
+            displayBallsStr = "";
+        } else {
+            if (overBallsStr) {
+                previousOverBalls = overBallsStr;
+            }
+            displayBallsStr = previousOverBalls;
+        }
+
         let batStats = matchData.BatsmanStats || {};
         let s1Runs = batStats[striker] ? (batStats[striker].Runs || 0) : 0;
         let s1Balls = batStats[striker] ? (batStats[striker].Balls || 0) : 0;
@@ -475,11 +495,10 @@
         let bBl = bBallsCount % 6;
         document.getElementById('bowlerInfo').innerHTML = `Bowler:<br>${bowler} (${bOv}.${bBl}-${bWickets})`;
 
-        let overBallsStr = matchData.OverBalls || "";
         let ballsContainer = document.getElementById('ballsContainer');
         ballsContainer.innerHTML = '';
-        if (overBallsStr) {
-            let ballArray = overBallsStr.split(',');
+        if (displayBallsStr) {
+            let ballArray = displayBallsStr.split(',');
             ballArray.forEach(ball => {
                 if (ball.trim()) {
                     let span = document.createElement('span');

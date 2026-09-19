@@ -20,12 +20,12 @@
             box-sizing: border-box;
         }
         .container { 
-            max-width: 780px; 
+            max-width: 850px; 
             width: 100%;
             margin: auto; 
             background: #111827; 
             border-radius: 24px; 
-            padding: 25px; 
+            padding: 30px; 
             box-shadow: 0 20px 40px rgba(0,0,0,0.6); 
             transition: all 0.3s ease; 
             border: 1px solid #1f2937;
@@ -37,71 +37,72 @@
             width: 100% !important;
             height: 100vh !important;
             border-radius: 0 !important;
-            padding: 20px 40px !important;
+            padding: 25px 50px !important;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: stretch;
-            gap: 10px !important;
+            gap: 12px !important;
             margin: 0 !important;
         }
 
         :fullscreen .score-card, :-webkit-full-screen .score-card {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
+            padding: 30px !important;
         }
 
         :fullscreen .button-row, :-webkit-full-screen .button-row {
-            margin-top: 0 !important;
+            margin-top: 5px !important;
         }
 
-        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 14px; padding: 14px; text-align: center; color: #FFFFFF; margin-bottom: 0; }
-        .top-card h3 { margin: 0 0 4px 0; font-size: 18px; color: #C8E6C9; letter-spacing: 1px; }
-        .top-card h1 { margin: 0; font-size: 28px; letter-spacing: 0.5px; }
-        :fullscreen .top-card h1, :-webkit-full-screen .top-card h1 { font-size: 40px !important; }
-        :fullscreen .top-card h3, :-webkit-full-screen .top-card h3 { font-size: 22px !important; }
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 14px; padding: 16px; text-align: center; color: #FFFFFF; margin-bottom: 0; }
+        .top-card h3 { margin: 0 0 4px 0; font-size: 20px; color: #C8E6C9; letter-spacing: 1px; }
+        .top-card h1 { margin: 0; font-size: 30px; letter-spacing: 0.5px; }
+        :fullscreen .top-card h1, :-webkit-full-screen .top-card h1 { font-size: 46px !important; }
+        :fullscreen .top-card h3, :-webkit-full-screen .top-card h3 { font-size: 24px !important; }
         
-        .score-card { background: linear-gradient(135deg, #1A237E, #3F51B5); border-radius: 16px; padding: 22px; color: #FFFFFF; margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 26px; font-weight: bold; }
-        :fullscreen .teams-row, :-webkit-full-screen .teams-row { font-size: 40px !important; margin-bottom: 10px !important; }
+        .score-card { background: linear-gradient(135deg, #1A237E, #3F51B5); border-radius: 16px; padding: 25px; color: #FFFFFF; margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 30px; font-weight: bold; }
+        :fullscreen .teams-row, :-webkit-full-screen .teams-row { font-size: 48px !important; margin-bottom: 15px !important; }
         .batting-team { color: #FFCC80; }
         .bowling-team { color: #C5CAE9; }
-        .vs-text { color: #C5CAE9; font-size: 18px; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 8px; }
-        :fullscreen .vs-text, :-webkit-full-screen .vs-text { font-size: 26px !important; }
+        .vs-text { color: #C5CAE9; font-size: 20px; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 8px; }
+        :fullscreen .vs-text, :-webkit-full-screen .vs-text { font-size: 30px !important; }
         
-        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .score-number { font-size: 75px; font-weight: bold; line-height: 1; }
-        :fullscreen .score-number, :-webkit-full-screen .score-number { font-size: 115px !important; }
+        .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .score-number { font-size: 85px; font-weight: bold; line-height: 1; }
+        :fullscreen .score-number, :-webkit-full-screen .score-number { font-size: 140px !important; }
         .right-stats { text-align: right; }
-        .overs-text { font-size: 24px; font-weight: bold; color: #E8EAF6; }
-        :fullscreen .overs-text, :-webkit-full-screen .overs-text { font-size: 34px !important; }
-        .crr-text { font-size: 18px; color: #B2DFDB; }
-        :fullscreen .crr-text, :-webkit-full-screen .crr-text { font-size: 26px !important; }
-        .target-text { font-size: 20px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
-        :fullscreen .target-text, :-webkit-full-screen .target-text { font-size: 28px !important; }
+        .overs-text { font-size: 26px; font-weight: bold; color: #E8EAF6; }
+        :fullscreen .overs-text, :-webkit-full-screen .overs-text { font-size: 40px !important; }
+        .crr-text { font-size: 20px; color: #B2DFDB; }
+        :fullscreen .crr-text, :-webkit-full-screen .crr-text { font-size: 30px !important; }
+        .target-text { font-size: 22px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
+        :fullscreen .target-text, :-webkit-full-screen .target-text { font-size: 34px !important; }
         
-        .over-balls-row { display: flex; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .over-label { color: #FFCC80; font-size: 18px; font-weight: bold; }
-        :fullscreen .over-label, :-webkit-full-screen .over-label { font-size: 26px !important; }
-        .balls-container { display: flex; gap: 8px; overflow-x: auto; }
-        .ball-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 16px; font-weight: bold; flex-shrink: 0; background: #334155; }
-        :fullscreen .ball-circle, :-webkit-full-screen .ball-circle { width: 50px !important; height: 50px !important; font-size: 22px !important; }
+        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .over-label { color: #FFCC80; font-size: 20px; font-weight: bold; }
+        :fullscreen .over-label, :-webkit-full-screen .over-label { font-size: 30px !important; }
+        .balls-container { display: flex; gap: 10px; overflow-x: auto; }
+        .ball-circle { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: bold; flex-shrink: 0; background: #334155; }
+        :fullscreen .ball-circle, :-webkit-full-screen .ball-circle { width: 58px !important; height: 58px !important; font-size: 26px !important; }
         
-        .divider { height: 2px; background: rgba(255,255,255,0.2); margin: 14px 0; }
-        :fullscreen .divider, :-webkit-full-screen .divider { margin: 10px 0 !important; }
+        .divider { height: 2px; background: rgba(255,255,255,0.2); margin: 16px 0; }
+        :fullscreen .divider, :-webkit-full-screen .divider { margin: 12px 0 !important; }
         
-        .info-layout { display: flex; justify-content: space-between; font-size: 20px; margin-bottom: 10px; color: #f8fafc; font-weight: bold; }
-        :fullscreen .info-layout, :-webkit-full-screen .info-layout { font-size: 28px !important; margin-bottom: 5px !important; }
+        .info-layout { display: flex; justify-content: space-between; font-size: 22px; margin-bottom: 12px; color: #f8fafc; font-weight: bold; }
+        :fullscreen .info-layout, :-webkit-full-screen .info-layout { font-size: 34px !important; margin-bottom: 8px !important; }
         .bowler-info { text-align: right; color: #FFEB3B; }
         
-        .requirement-bar { background: #1e1b4b; color: #fde047; border: 2px solid #f59e0b; padding: 14px; border-radius: 12px; text-align: center; font-size: 20px; font-weight: bold; margin-top: 10px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: none; white-space: pre-line; }
-        :fullscreen .requirement-bar, :-webkit-full-screen .requirement-bar { font-size: 32px !important; padding: 18px !important; border-width: 3px !important; margin-top: 5px !important; }
+        .requirement-bar { background: #1e1b4b; color: #fde047; border: 2px solid #f59e0b; padding: 16px; border-radius: 12px; text-align: center; font-size: 22px; font-weight: bold; margin-top: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: none; white-space: pre-line; }
+        :fullscreen .requirement-bar, :-webkit-full-screen .requirement-bar { font-size: 38px !important; padding: 22px !important; border-width: 3px !important; margin-top: 8px !important; }
         
-        .button-row { display: flex; gap: 12px; margin-top: 15px; }
-        .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; transition: transform 0.1s; }
+        .button-row { display: flex; gap: 12px; margin-top: 18px; }
+        .action-btn { flex: 1; padding: 16px 10px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; transition: transform 0.1s; }
         .action-btn:hover { transform: translateY(-2px); }
-        :fullscreen .action-btn, :-webkit-full-screen .action-btn { font-size: 18px !important; padding: 16px !important; }
+        :fullscreen .action-btn, :-webkit-full-screen .action-btn { font-size: 20px !important; padding: 20px !important; }
         .btn-scorecard { background: #2563eb; }
         .btn-fullscreen { background: #1E293B; border: 1px solid #475569; }
         .btn-back { background: #047857; }

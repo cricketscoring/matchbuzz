@@ -8,123 +8,77 @@
     <meta http-equiv="Expires" content="0">
     <title>MatchBuzz: Live Scoreboard</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #0b0f19; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            box-sizing: border-box;
-        }
-        .container { 
-            max-width: 850px; 
-            width: 100%;
-            margin: auto; 
-            background: #111827; 
-            border-radius: 24px; 
-            padding: 30px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6); 
-            transition: all 0.3s ease; 
-            border: 1px solid #1f2937;
-            box-sizing: border-box;
-        }
+        body { font-family: Arial, sans-serif; background: #E8F5E9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #FFFFFF; border-radius: 16px; padding: 15px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; }
         
-        :fullscreen .container, :-webkit-full-screen .container {
+        :fullscreen .container {
             max-width: 100% !important;
             width: 100% !important;
             height: 100vh !important;
             border-radius: 0 !important;
-            padding: 25px 50px !important;
+            padding: 20px 40px !important;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: stretch;
-            gap: 12px !important;
+            gap: 15px;
             margin: 0 !important;
         }
 
-        :fullscreen .score-card, :-webkit-full-screen .score-card {
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            padding: 30px !important;
-        }
-
-        :fullscreen .button-row, :-webkit-full-screen .button-row {
-            margin-top: 5px !important;
-        }
-
-        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 14px; padding: 16px; text-align: center; color: #FFFFFF; margin-bottom: 0; }
-        .top-card h3 { margin: 0 0 4px 0; font-size: 20px; color: #C8E6C9; letter-spacing: 1px; }
-        .top-card h1 { margin: 0; font-size: 30px; letter-spacing: 0.5px; }
-        :fullscreen .top-card h1, :-webkit-full-screen .top-card h1 { font-size: 46px !important; }
-        :fullscreen .top-card h3, :-webkit-full-screen .top-card h3 { font-size: 24px !important; }
+        .top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 12px; text-align: center; color: #FFFFFF; margin-bottom: 0; }
+        .top-card h3 { margin: 0 0 3px 0; font-size: 20px; color: #C8E6C9; }
+        .top-card h1 { margin: 0; font-size: 30px; }
         
-        .score-card { background: linear-gradient(135deg, #1A237E, #3F51B5); border-radius: 16px; padding: 25px; color: #FFFFFF; margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 30px; font-weight: bold; }
-        :fullscreen .teams-row, :-webkit-full-screen .teams-row { font-size: 48px !important; margin-bottom: 15px !important; }
+        .score-card { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px 25px; color: #FFFFFF; margin-bottom: 0; }
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 40px; font-weight: bold; }
         .batting-team { color: #FFCC80; }
         .bowling-team { color: #C5CAE9; }
-        .vs-text { color: #C5CAE9; font-size: 20px; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 8px; }
-        :fullscreen .vs-text, :-webkit-full-screen .vs-text { font-size: 30px !important; }
+        .vs-text { color: #C5CAE9; font-size: 32px; }
         
         .run-layout { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .score-number { font-size: 85px; font-weight: bold; line-height: 1; }
-        :fullscreen .score-number, :-webkit-full-screen .score-number { font-size: 140px !important; }
+        .score-number { font-size: 115px; font-weight: bold; line-height: 1; }
         .right-stats { text-align: right; }
-        .overs-text { font-size: 26px; font-weight: bold; color: #E8EAF6; }
-        :fullscreen .overs-text, :-webkit-full-screen .overs-text { font-size: 40px !important; }
-        .crr-text { font-size: 20px; color: #B2DFDB; }
-        :fullscreen .crr-text, :-webkit-full-screen .crr-text { font-size: 30px !important; }
-        .target-text { font-size: 22px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
-        :fullscreen .target-text, :-webkit-full-screen .target-text { font-size: 34px !important; }
+        .overs-text { font-size: 44px; font-weight: bold; color: #E8EAF6; }
+        .crr-text { font-size: 30px; color: #B2DFDB; }
+        .target-text { font-size: 32px; font-weight: bold; color: #FFCC80; margin-bottom: 4px; }
         
-        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .over-label { color: #FFCC80; font-size: 20px; font-weight: bold; }
-        :fullscreen .over-label, :-webkit-full-screen .over-label { font-size: 30px !important; }
+        .over-balls-row { display: flex; align-items: center; margin-bottom: 15px; }
+        .over-label { color: #FFCC80; font-size: 26px; font-weight: bold; margin-right: 15px; }
         .balls-container { display: flex; gap: 10px; overflow-x: auto; }
-        .ball-circle { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: bold; flex-shrink: 0; background: #334155; }
-        :fullscreen .ball-circle, :-webkit-full-screen .ball-circle { width: 58px !important; height: 58px !important; font-size: 26px !important; }
+        .ball-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 22px; font-weight: bold; flex-shrink: 0; }
         
-        .divider { height: 2px; background: rgba(255,255,255,0.2); margin: 16px 0; }
-        :fullscreen .divider, :-webkit-full-screen .divider { margin: 12px 0 !important; }
+        .divider { height: 3px; background: #5C6BC0; margin: 15px 0; }
         
-        .info-layout { display: flex; justify-content: space-between; font-size: 22px; margin-bottom: 12px; color: #f8fafc; font-weight: bold; }
-        :fullscreen .info-layout, :-webkit-full-screen .info-layout { font-size: 34px !important; margin-bottom: 8px !important; }
+        .info-layout { display: flex; justify-content: space-between; font-size: 36px; margin-bottom: 15px; }
         .bowler-info { text-align: right; color: #FFEB3B; }
         
-        .requirement-bar { background: #1e1b4b; color: #fde047; border: 2px solid #f59e0b; padding: 16px; border-radius: 12px; text-align: center; font-size: 22px; font-weight: bold; margin-top: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: none; white-space: pre-line; }
-        :fullscreen .requirement-bar, :-webkit-full-screen .requirement-bar { font-size: 38px !important; padding: 22px !important; border-width: 3px !important; margin-top: 8px !important; }
+        .requirement-bar { background: #FFECB3; color: #1A237E; padding: 15px; border-radius: 10px; text-align: center; font-size: 34px; font-weight: bold; margin-bottom: 5px; display: none; white-space: pre-line; }
         
-        .button-row { display: flex; gap: 12px; margin-top: 18px; }
-        .action-btn { flex: 1; padding: 16px 10px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; transition: transform 0.1s; }
-        .action-btn:hover { transform: translateY(-2px); }
-        :fullscreen .action-btn, :-webkit-full-screen .action-btn { font-size: 20px !important; padding: 20px !important; }
-        .btn-scorecard { background: #2563eb; }
-        .btn-fullscreen { background: #1E293B; border: 1px solid #475569; }
+        .button-row { display: flex; gap: 10px; margin-top: 0; }
+        .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 12px; font-size: 12px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .btn-scorecard { background: #0F172A; }
+        .btn-fullscreen { background: #1E293B; }
         .btn-back { background: #047857; }
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow-y: auto; padding: 10px; box-sizing: border-box; }
-        .modal-content { background: #111827; color: white; border-radius: 16px; width: 98%; max-width: 100%; height: 100vh; margin: 0; padding: 30px; position: relative; box-sizing: border-box; overflow-y: auto; }
-        .close-modal-btn { background: #B91C1C; color: white; border: none; padding: 12px 22px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 15px; float: right; }
+        .modal-content { background: #F4F6F9; border-radius: 16px; width: 96%; max-width: 1200px; margin: 20px auto; padding: 25px; position: relative; box-sizing: border-box; }
+        .close-modal-btn { background: #B91C1C; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 15px; float: right; }
         
-        .sc-top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 18px; text-align: center; color: #FFFFFF; margin-bottom: 20px; clear: both; }
+        .sc-top-card { background: linear-gradient(to bottom, #1B5E20, #2E7D32); border-radius: 12px; padding: 18px; text-align: center; color: #FFFFFF; margin-bottom: 15px; clear: both; }
         .sc-top-card h3 { font-size: 20px !important; margin: 0 0 5px 0; color: #C8E6C9; }
         .sc-top-card h1 { font-size: 28px !important; margin: 0 0 5px 0; }
-        .sc-top-card p { font-size: 24px !important; margin: 0; color: #E8EAF6; font-weight: bold; }
+        .sc-top-card p { font-size: 18px !important; margin: 0; color: #E8EAF6; font-weight: bold; }
 
-        .sc-tab-layout { display: flex; gap: 12px; margin-bottom: 20px; }
-        .sc-tab-btn { flex: 1; padding: 16px; border: none; border-radius: 10px; font-size: 28px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
+        .sc-tab-layout { display: flex; gap: 10px; margin-bottom: 15px; }
+        .sc-tab-btn { flex: 1; padding: 14px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; color: #FFFFFF; cursor: pointer; text-align: center; }
         .sc-tab-active { background: #00695C; }
-        .sc-tab-inactive { background: #334155; }
+        .sc-tab-inactive { background: #B0BEC5; }
 
-        .sc-score-summary { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 20px; }
-        .sc-table-card { background: #1f2937; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .sc-table-row { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #374151; font-size: 56px; color: #f8fafc; }
-        .sc-table-header { font-weight: bold; color: #93c5fd; border-bottom: 2px solid #4b5563; font-size: 60px !important; }
+        .sc-score-summary { background: linear-gradient(to bottom, #1A237E, #3F51B5); border-radius: 12px; padding: 20px; color: #FFFFFF; margin-bottom: 15px; }
+        .sc-table-card { background: #FFFFFF; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .sc-table-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #E2E8F0; font-size: 22px; color: #333333; }
+        .sc-table-header { font-weight: bold; color: #3F51B5; border-bottom: 3px solid #CBD5E1; font-size: 24px !important; }
     </style>
 </head>
 <body>
@@ -190,12 +144,12 @@
         </div>
 
         <div class="sc-score-summary">
-            <div id="scSummaryBatTeam" style="color: #FFCC80; font-size: 64px; font-weight: bold; margin-bottom: 8px;">BATTING TEAM</div>
-            <div id="scSummaryScore" style="font-size: 90px; font-weight: bold; margin-bottom: 8px;">0/0 (0.0 Ov)</div>
-            <div id="scSummaryMessage" style="color: #FFECB3; font-size: 52px; font-weight: bold;"></div>
+            <div id="scSummaryBatTeam" style="color: #FFCC80; font-size: 26px; font-weight: bold; margin-bottom: 8px;">BATTING TEAM</div>
+            <div id="scSummaryScore" style="font-size: 34px; font-weight: bold; margin-bottom: 8px;">0/0 (0.0 Ov)</div>
+            <div id="scSummaryMessage" style="color: #FFECB3; font-size: 22px; font-weight: bold;"></div>
         </div>
 
-        <div style="color: #93c5fd; font-size: 64px; font-weight: bold; margin-bottom: 10px;">Batting Scorecard</div>
+        <div style="color: #1A237E; font-size: 24px; font-weight: bold; margin-bottom: 10px;">Batting Scorecard</div>
         <div class="sc-table-card">
             <div class="sc-table-row sc-table-header">
                 <div style="flex: 2; text-align: left;">Batsman</div>
@@ -207,7 +161,7 @@
             <div id="scBattingRows"></div>
         </div>
 
-        <div style="color: #93c5fd; font-size: 64px; font-weight: bold; margin-bottom: 10px;">Bowling Scorecard</div>
+        <div style="color: #1A237E; font-size: 24px; font-weight: bold; margin-bottom: 10px;">Bowling Scorecard</div>
         <div class="sc-table-card">
             <div class="sc-table-row sc-table-header">
                 <div style="flex: 2; text-align: left;">Bowler</div>
@@ -584,7 +538,7 @@
 
         let striker = mData.Striker || "";
         let nonStriker = mData.NonStriker || "";
-        let isCurrentInningsActive = (currentActiveInnings === (mData.Innings || 1)) && !mData.IsOver;
+        let isCurrentInningsActive = (currentActiveInnings === (mData.Innings || 1)) && !mData.IsOver && !mData.I1Ended;
 
         let batRowsContainer = document.getElementById('scBattingRows');
         batRowsContainer.innerHTML = '';
@@ -613,7 +567,7 @@
                 batRowsContainer.appendChild(row);
             }
         } else {
-            batRowsContainer.innerHTML = '<div style="padding: 10px; color: #94a3b8; font-size: 40px;">No batting records available.</div>';
+            batRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575; font-size: 20px;">No batting records available.</div>';
         }
 
         let bowlRowsContainer = document.getElementById('scBowlingRows');
@@ -626,8 +580,7 @@
                 let bOvers = Math.floor(bBalls / 6);
                 let bRemBalls = bBalls % 6;
 
-                let row = document.getElementById('scTableRow'; // fixed closing logic
-                row = document.createElement('div');
+                let row = document.createElement('div');
                 row.className = 'sc-table-row';
                 row.innerHTML = `
                     <div style="flex: 2; text-align: left;">${name}</div>
@@ -638,7 +591,7 @@
                 bowlRowsContainer.appendChild(row);
             }
         } else {
-            bowlRowsContainer.innerHTML = '<div style="padding: 10px; color: #94a3b8; font-size: 40px;">No bowling records available.</div>';
+            bowlRowsContainer.innerHTML = '<div style="padding: 10px; color: #757575; font-size: 20px;">No bowling records available.</div>';
         }
     }
 </script>

@@ -8,23 +8,6 @@
     <meta http-equiv="Expires" content="0">
     <title>MatchBuzz: Live Scoreboard</title>
     <style>
-        #introOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 99999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #introOverlay video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
         body { 
             font-family: Arial, sans-serif; 
             background: #0b0f19; 
@@ -146,10 +129,6 @@
 </head>
 <body>
 
-<div id="introOverlay">
-    <video id="introVideo" src="scoreanimation.mp4" autoplay muted playsinline preload="auto"></video>
-</div>
-
 <div class="container" id="mainContainer">
     <div class="top-card">
         <h3 id="stageTitle">★ MATCH ★</h3>
@@ -244,25 +223,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-
-    const enableIntro = true;
-
-    if (!enableIntro) {
-        document.getElementById('introOverlay').style.display = 'none';
-    } else {
-        const introVideo = document.getElementById('introVideo');
-        introVideo.play().catch(() => {});
-        
-        introVideo.onended = () => {
-            document.getElementById('introOverlay').style.display = 'none';
-        };
-        setTimeout(() => {
-            const overlay = document.getElementById('introOverlay');
-            if (overlay && overlay.style.display !== 'none') {
-                overlay.style.display = 'none';
-            }
-        }, 12000);
-    }
 
     const firebaseConfig = {
         apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",

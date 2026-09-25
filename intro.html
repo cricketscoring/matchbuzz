@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchBuzz: Live Intro</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, #0b1c3d 0%, #020817 100%);
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #ffffff;
+        }
+        .intro-container {
+            text-align: center;
+            padding: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .ball-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        h1 {
+            font-size: 28px;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        p {
+            font-size: 16px;
+            color: #CFD8DC;
+            letter-spacing: 1px;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="intro-container">
+    <div class="ball-icon">🏆</div>
+    <h1 id="tourNameDisplay">LOADING TOURNAMENT...</h1>
+    <p>GET READY FOR LIVE MATCH</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMDdv0RET-RWY7M6uV376S1EI6CoPTY2o",
+        authDomain: "cricket-scoring-a.firebaseapp.com",
+        databaseURL: "https://cricket-scoring-a-default-rtdb.firebaseio.com",
+        projectId: "cricket-scoring-a",
+        storageBucket: "cricket-scoring-a.firebasestorage.app",
+        messagingSenderId: "695009872829",
+        appId: "1:695009872829:web:80a58e4841761bdcc3e0d4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourKey = urlParams.get('tour') || 'Tour_0';
+    const matchIndex = urlParams.get('match') || '0';
+    const stageName = urlParams.get('stage') || '';
+
+    const tourRef = ref(db, `Tournaments/${tourKey}`);
+    
+    get(tourRef).then((snapshot) => {
+        let tName = "CRICKET TOURNAMENT";
+        if (snapshot.exists()) {
+            let data = snapshot.val();
+            if (data.T_Name) {
+                tName = data.T_Name;
+            }
+        }
+        document.getElementById('tourNameDisplay').innerText = tName;
+    }).catch((error) => {
+        document.getElementById('tourNameDisplay').innerText = "CRICKET TOURNAMENT";
+    });
+
+    setTimeout(() => {
+        let targetUrl = `score.html?tour=${tourKey}&match=${matchIndex}`;
+        if (stageName) {
+            targetUrl += `&stage=${encodeURIComponent(stageName)}`;
+        }
+        window.location.href = targetUrl;
+    }, 3500);
+</script>
+
+</body>
+</html>
